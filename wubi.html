@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wubi Input Method - Tovi's Website</title>
+  
+  <!-- Load Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Configure Tailwind to respect system dark mode -->
+  <script>
+    tailwind.config = {
+      darkMode: 'media',
+    }
+  </script>
+
+  <!-- Load React -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Load Babel to understand JSX in the browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <style>
+    .footer-content {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      font-size: 14px;
+      flex-wrap: wrap;
+    }
+    
+    .footer-content a {
+      color: #94a3b8;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .footer-content a:hover {
+      color: #3b82f6;
+    }
+    
+    .social-links {
+      display: flex;
+      gap: 12px;
+      margin-left: 16px;
+    }
+    
+    .social-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      background: rgba(71, 85, 105, 0.4);
+    }
+    
+    .social-icon:hover {
+      transform: translateY(-2px);
+      background: rgba(59, 130, 246, 0.2);
+    }
+    
+    .social-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <footer class="bg-slate-900/80 backdrop-blur-md border-t border-slate-700 mt-8 py-4">
+    <div class="container mx-auto px-4">
+      <div class="footer-content justify-center">
+        <a href="index.html">← Back to Home</a>
+        <a href="sheep.html">Chaos Sheep Counter</a>
+        <div class="social-links">
+          <a href="https://x.com/ToviDing" target="_blank" class="social-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </a>
+          <a href="https://www.printables.com/" target="_blank" class="social-icon">
+            <div class="w-4 h-4 bg-current rounded flex items-center justify-center">
+              <span class="text-xs font-bold">P</span>
+            </div>
+          </a>
+          <a href="https://www.instagram.com/" target="_blank" class="social-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- React Code starts here -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Multi-version Wubi Mnemonics Data (86, 98, and New Century 06)
+    const wubiData = {
+      Q: { zone: 35, letter: 'Q', keyName: '金', mnemonic: { '86': '金勺缺点无尾鱼\n犬旁留乂儿一点夕\n氏无七', '98': '金夕鸟儿犭边鱼', '06': '金夕犭儿包头鱼' } },
+      W: { zone: 34, letter: 'W', keyName: '人', mnemonic: { '86': '人和八，三四里', '98': '人八登头单人几', '06': '人八登祭风头几' } },
+      E: { zone: 33, letter: 'E', keyName: '月', mnemonic: { '86': '月彡乃用家衣底', '98': '月用力豸毛衣底', '06': '月舟衣力豕豸臼' } },
+      R: { zone: 32, letter: 'R', keyName: '白', mnemonic: { '86': '白手看头三二斤', '98': '白斤气丘叉手提', '06': '白斤气头叉手提' } },
+      T: { zone: 31, letter: 'T', keyName: '禾', mnemonic: { '86': '禾竹一撇双人立\n反文条头共三一', '98': '禾竹反文双人立', '06': '禾竹牛旁卧人立' } },
+      Y: { zone: 41, letter: 'Y', keyName: '言', mnemonic: { '86': '言文交老拼洞九', '98': '言文方点谁人计', '06': '言文方点在四一' } },
+      U: { zone: 42, letter: 'U', keyName: '立', mnemonic: { '86': '立辛两点六门疒', '98': '立辛六门病旁里', '06': '立带两点病门里' } },
+      I: { zone: 43, letter: 'I', keyName: '水', mnemonic: { '86': '水旁泉头家族小', '98': '水族三点鳖头小', '06': '水边一族三点小' } },
+      O: { zone: 44, letter: 'O', keyName: '火', mnemonic: { '86': '火业头，四点米', '98': '火业广鹿四点米', '06': '火变三态广二米' } },
+      P: { zone: 45, letter: 'P', keyName: '之', mnemonic: { '86': '之宝盖，摘示衣', '98': '之字宝盖摘示衣', '06': '之字宝盖补示衣' } },
+      A: { zone: 15, letter: 'A', keyName: '工', mnemonic: { '86': '工戈草头右框七', '98': '工戈草头右框七', '06': '工戈草头右框七' } },
+      S: { zone: 14, letter: 'S', keyName: '木', mnemonic: { '86': '木丁西', '98': '木丁西林甫寸里', '06': '木丁西边要无女' } },
+      D: { zone: 13, letter: 'D', keyName: '大', mnemonic: { '86': '大犬三羊古石厂', '98': '大犬戊其古石厂', '06': '大三肆头古石厂' } },
+      F: { zone: 12, letter: 'F', keyName: '土', mnemonic: { '86': '土士二干十寸雨', '98': '土干十寸未甘雨', '06': '土士二干十寸雨' } },
+      G: { zone: 11, letter: 'G', keyName: '王', mnemonic: { '86': '王旁青头戋五一', '98': '王旁青头五夫一', '06': '王旁青头五一提' } },
+      H: { zone: 21, letter: 'H', keyName: '目', mnemonic: { '86': '目具上止卜虎皮', '98': '目上止卜虎头具', '06': '目止具头卜虎皮' } },
+      J: { zone: 22, letter: 'J', keyName: '日', mnemonic: { '86': '日早两竖与虫依', '98': '日早两竖与虫依', '06': '日曰两竖与虫依' } },
+      K: { zone: 23, letter: 'K', keyName: '口', mnemonic: { '86': '口与川，字根稀', '98': '口川码元稀', '06': '口中两川三个竖' } },
+      L: { zone: 24, letter: 'L', keyName: '田', mnemonic: { '86': '田甲方框四车力', '98': '田甲方框四车力', '06': '田框四车甲单底' } },
+      M: { zone: 25, letter: 'M', keyName: '山', mnemonic: { '86': '山由贝，下框几', '98': '山由贝骨下框几', '06': '山由贝骨下框几' } },
+      Z: { zone: 0, letter: 'Z', keyName: 'Z', mnemonic: { '86': '万能键 / 学习键', '98': '万能键 / 学习键', '06': '万能键 / 学习键' } },
+      X: { zone: 55, letter: 'X', keyName: '幺', mnemonic: { '86': '慈母无心弓和匕\n幼无力', '98': '幺母贯头弓和匕', '06': '幺母绞丝弓三匕' } },
+      C: { zone: 54, letter: 'C', keyName: '又', mnemonic: { '86': '又巴马，丢矢矣', '98': '又巴牛尹马失蹄', '06': '又巴甬矣马失蹄' } },
+      V: { zone: 53, letter: 'V', keyName: '女', mnemonic: { '86': '女刀九臼山朝西', '98': '女刀九艮山西倒', '06': '女刀九巡录无水' } },
+      B: { zone: 52, letter: 'B', keyName: '子', mnemonic: { '86': '子耳了也框向上', '98': '子耳了也乃框底', '06': '子耳了也乃齿底' } },
+      N: { zone: 51, letter: 'N', keyName: '已', mnemonic: { '86': '已半巳满不出己\n左框折尸心和羽', '98': '已类左框心尸羽', '06': '已类左框心尸羽' } },
+    };
+
+    const rows = [
+      ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+      ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+      ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
+    ];
+
+    const versionsList = [
+      { id: '86', name: '86版' },
+      { id: '98', name: '98版' },
+      { id: '06', name: '新世纪 (06版)' }
+    ];
+
+    // Mathematical proportions for a fluid mechanical layout mapping 10 columns
+    const KEY_W = '9.174%';
+    const GAP_W = '0.917%';
+    const ROW2_OFFSET = '5.045%';
+    const ROW3_OFFSET = '15.137%';
+
+    function KeyBlock({ data, isActive, isFirst, offset, currentVersion }) {
+      const zoneFirstDigit = Math.floor(data.zone / 10);
+      let colorTheme = '';
+
+      // Apply colors based on stroke zones
+      switch (zoneFirstDigit) {
+        case 1: // 横
+          colorTheme = 'border-blue-300 bg-blue-50 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 dark:border-blue-700';
+          break;
+        case 2: // 竖
+          colorTheme = 'border-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-900 dark:text-emerald-100 dark:border-emerald-700';
+          break;
+        case 3: // 撇
+          colorTheme = 'border-amber-300 bg-amber-50 dark:bg-amber-900/30 text-amber-900 dark:text-amber-100 dark:border-amber-700';
+          break;
+        case 4: // 点/捺
+          colorTheme = 'border-rose-300 bg-rose-50 dark:bg-rose-900/30 text-rose-900 dark:text-rose-100 dark:border-rose-700';
+          break;
+        case 5: // 折
+          colorTheme = 'border-purple-300 bg-purple-50 dark:bg-purple-900/30 text-purple-900 dark:text-purple-100 dark:border-purple-700';
+          break;
+        default: // Z键
+          colorTheme = 'border-gray-300 bg-gray-50 dark:bg-gray-800/50 text-gray-800 dark:text-gray-200 dark:border-gray-600';
+          break;
+      }
+
+      // We rely on CSS variable --kb-w which represents bounded available width to scale perfectly!
+      const pressStyles = isActive 
+        ? `border-b-[1px] shadow-inner brightness-105 saturate-150 ring-4 ring-current ring-opacity-40 translate-y-[2px] md:translate-y-[4px]` 
+        : `hover:-translate-y-[2px] hover:shadow-xl`;
+
+      return (
+        <div 
+          className={`flex flex-col aspect-[3/4.2] border relative select-none transition-all duration-100 ${colorTheme} ${pressStyles}`}
+          style={{ 
+            width: KEY_W,
+            marginLeft: isFirst ? offset : '0px',
+            padding: 'clamp(2px, calc(var(--kb-w) * 0.008), 12px)',
+            borderRadius: 'clamp(4px, calc(var(--kb-w) * 0.012), 24px)',
+            borderBottomWidth: isActive ? '1px' : 'clamp(3px, calc(var(--kb-w) * 0.008), 8px)'
+          }}
+        >
+          <div className="flex justify-between items-start font-bold leading-none">
+            <span className="font-mono opacity-80" style={{ fontSize: 'clamp(8px, calc(var(--kb-w) * 0.015), 36px)' }}>{data.letter}</span>
+            {data.zone > 0 && (
+              <span className="font-mono opacity-70 bg-black/5 dark:bg-white/10" 
+                    style={{ 
+                      fontSize: 'clamp(6px, calc(var(--kb-w) * 0.009), 18px)',
+                      padding: 'clamp(1px, calc(var(--kb-w)*0.002), 4px) clamp(2px, calc(var(--kb-w)*0.004), 8px)',
+                      borderRadius: 'clamp(2px, calc(var(--kb-w)*0.005), 8px)'
+                    }}>
+                {data.zone}
+              </span>
+            )}
+          </div>
+          
+          <div className="flex-grow flex items-center justify-center -mt-1 lg:-mt-2">
+            <span className="font-black" style={{ fontSize: 'clamp(14px, calc(var(--kb-w) * 0.042), 90px)' }}>{data.keyName}</span>
+          </div>
+          
+          <div className="text-center font-semibold tracking-wide mt-auto opacity-90 leading-tight whitespace-pre-wrap break-words" 
+               style={{ fontSize: 'clamp(6px, calc(var(--kb-w) * 0.009), 16px)' }}>
+            {data.mnemonic[currentVersion]}
+          </div>
+        </div>
+      );
+    }
+
+    const Legend = () => (
+      <div className="flex flex-wrap justify-center gap-2 lg:gap-4 my-4 lg:my-6 px-2">
+        <div className="flex items-center gap-1.5 bg-blue-100/80 dark:bg-blue-900/40 px-3 py-1 lg:py-1.5 rounded-xl border border-blue-200 dark:border-blue-800 shadow-sm">
+          <span className="text-blue-600 dark:text-blue-400 font-black text-sm lg:text-lg">一</span>
+          <span className="text-blue-900 dark:text-blue-100 font-semibold text-xs lg:text-sm">1区 横起笔 (G-A)</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-emerald-100/80 dark:bg-emerald-900/40 px-3 py-1 lg:py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800 shadow-sm">
+          <span className="text-emerald-600 dark:text-emerald-400 font-black text-sm lg:text-lg">丨</span>
+          <span className="text-emerald-900 dark:text-emerald-100 font-semibold text-xs lg:text-sm">2区 竖起笔 (H-M)</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-amber-100/80 dark:bg-amber-900/40 px-3 py-1 lg:py-1.5 rounded-xl border border-amber-200 dark:border-amber-800 shadow-sm">
+          <span className="text-amber-600 dark:text-amber-400 font-black text-sm lg:text-lg">丿</span>
+          <span className="text-amber-900 dark:text-amber-100 font-semibold text-xs lg:text-sm">3区 撇起笔 (T-Q)</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-rose-100/80 dark:bg-rose-900/40 px-3 py-1 lg:py-1.5 rounded-xl border border-rose-200 dark:border-rose-800 shadow-sm">
+          <span className="text-rose-600 dark:text-rose-400 font-black text-sm lg:text-lg">丶</span>
+          <span className="text-rose-900 dark:text-rose-100 font-semibold text-xs lg:text-sm">4区 点起笔 (Y-P)</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-purple-100/80 dark:bg-purple-900/40 px-3 py-1 lg:py-1.5 rounded-xl border border-purple-200 dark:border-purple-800 shadow-sm">
+          <span className="text-purple-600 dark:text-purple-400 font-black text-sm lg:text-lg">乙</span>
+          <span className="text-purple-900 dark:text-purple-100 font-semibold text-xs lg:text-sm">5区 折起笔 (N-X)</span>
+        </div>
+      </div>
+    );
+
+    function App() {
+      const [pressedKeys, setPressedKeys] = useState(new Set());
+      const [activeVersion, setActiveVersion] = useState('06');
+
+      // Handle physical keyboard input
+      useEffect(() => {
+        const handleKeyDown = (e) => {
+          if (e.ctrlKey || e.metaKey || e.altKey) return;
+          const key = e.key.toUpperCase();
+          if (wubiData[key]) {
+            setPressedKeys(prev => {
+              const next = new Set(prev);
+              next.add(key);
+              return next;
+            });
+          }
+        };
+
+        const handleKeyUp = (e) => {
+          const key = e.key.toUpperCase();
+          if (wubiData[key]) {
+            setPressedKeys(prev => {
+              const next = new Set(prev);
+              next.delete(key);
+              return next;
+            });
+          }
+        };
+
+        const handleBlur = () => setPressedKeys(new Set());
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+        window.addEventListener('blur', handleBlur);
+
+        return () => {
+          window.removeEventListener('keydown', handleKeyDown);
+          window.removeEventListener('keyup', handleKeyUp);
+          window.removeEventListener('blur', handleBlur);
+        };
+      }, []);
+
+      return (
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-4 lg:py-8 px-2 sm:px-4 md:px-8 font-sans selection:bg-blue-200 dark:selection:bg-blue-900 flex flex-col items-center">
+          
+          {/* Main Wrapper: Dynamically bounds width to prevent overflowing height on ultra-wide screens! */}
+          <div 
+            className="w-full flex flex-col items-center" 
+            style={{ 
+              maxWidth: 'min(100%, 150vh)', 
+              '--kb-w': 'min(100vw, 150vh)' 
+            }}
+          >
+            
+            <header className="text-center mb-4 lg:mb-6 px-4 w-full">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-3 lg:mb-4 text-slate-800 dark:text-white transition-all">
+                五笔字根键盘布局图
+              </h1>
+
+              {/* Version Switcher */}
+              <div className="flex justify-center mb-4">
+                <div className="bg-slate-200/80 dark:bg-slate-800 p-1 rounded-xl flex gap-1 shadow-inner border border-slate-300 dark:border-slate-700">
+                  {versionsList.map(v => (
+                    <button
+                      key={v.id}
+                      onClick={() => setActiveVersion(v.id)}
+                      className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm transition-all duration-200 ${
+                        activeVersion === v.id 
+                          ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm border border-slate-100 dark:border-slate-500' 
+                          : 'text-slate-500 dark:text-slate-400 hover:bg-slate-300/50 dark:hover:bg-slate-700 border border-transparent'
+                      }`}
+                    >
+                      {v.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto font-medium">
+                当前显示: <strong className="text-blue-600 dark:text-blue-400">{versionsList.find(v => v.id === activeVersion).name}</strong>。按下实体键盘按键即可点亮对应字根。
+              </p>
+            </header>
+
+            <Legend />
+
+            {/* Keyboard Layout Board */}
+            <div 
+              className="bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 w-full mx-auto"
+              style={{
+                borderRadius: 'clamp(12px, calc(var(--kb-w) * 0.02), 40px)',
+                padding: 'clamp(8px, calc(var(--kb-w) * 0.02), 40px)'
+              }}
+            >
+              {/* Fluid Layout Container without horizontal overflow scrollbars */}
+              <div className="flex flex-col w-full items-start" style={{ gap: GAP_W }}>
+                
+                {/* Row 1 */}
+                <div className="flex w-full justify-start" style={{ gap: GAP_W }}>
+                  {rows[0].map(letter => (
+                    <KeyBlock key={letter} data={wubiData[letter]} isActive={pressedKeys.has(letter)} isFirst={false} currentVersion={activeVersion} />
+                  ))}
+                </div>
+                
+                {/* Row 2 - Perfect proportional offset */}
+                <div className="flex w-full justify-start" style={{ gap: GAP_W }}>
+                  {rows[1].map((letter, idx) => (
+                    <KeyBlock key={letter} data={wubiData[letter]} isActive={pressedKeys.has(letter)} isFirst={idx === 0} offset={ROW2_OFFSET} currentVersion={activeVersion} />
+                  ))}
+                </div>
+                
+                {/* Row 3 - Perfect proportional offset */}
+                <div className="flex w-full justify-start" style={{ gap: GAP_W }}>
+                  {rows[2].map((letter, idx) => (
+                    <KeyBlock key={letter} data={wubiData[letter]} isActive={pressedKeys.has(letter)} isFirst={idx === 0} offset={ROW3_OFFSET} currentVersion={activeVersion} />
+                  ))}
+                </div>
+
+              </div>
+            </div>
+
+            <footer className="mt-6 lg:mt-8 text-center text-slate-500 dark:text-slate-500 text-[10px] sm:text-xs font-medium pb-20">
+              <p>排布遵循物理键盘 (QWERTY) 布局，数据基于标准五笔字型方案。</p>
+            </footer>
+          </div>
+        </div>
+      );
+    }
+
+    // Render the app
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

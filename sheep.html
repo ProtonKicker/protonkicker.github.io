@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chaos Sheep Counter - Tovi's Website</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0f172a;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: white;
+            user-select: none;
+        }
+        canvas {
+            display: block;
+        }
+        .ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(8px);
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: auto;
+        }
+        .counter-text {
+            font-size: 3rem;
+            font-weight: 900;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            font-variant-numeric: tabular-nums;
+        }
+        input[type="range"] {
+            cursor: pointer;
+        }
+        
+        /* Footer styles */
+        footer {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            z-index: 5;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-content {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 12px;
+        }
+        
+        .footer-content a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-content a:hover {
+            color: #3b82f6;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 12px;
+            margin-left: 16px;
+        }
+        
+        .social-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            background: rgba(51, 65, 85, 0.6);
+        }
+        
+        .social-icon:hover {
+            transform: translateY(-2px);
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .social-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ui-overlay">
+        <div class="text-xs uppercase tracking-widest opacity-50 mb-1">Total Insomnia Sheep</div>
+        <div id="counter" class="counter-text">0</div>
+    </div>
+
+    <div class="controls">
+        <div class="flex flex-col">
+            <label class="text-[10px] uppercase font-bold opacity-70">Chaos Intensity</label>
+            <input type="range" id="chaosRange" min="1" max="50" value="10" class="w-32 accent-white">
+        </div>
+        <div class="h-8 w-[1px] bg-white/20"></div>
+        <button id="toggleBtn" class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition-colors">
+            PAUSE
+        </button>
+        <button id="resetBtn" class="bg-slate-700 text-white px-6 py-2 rounded-full font-bold hover:bg-slate-600 transition-colors">
+            RESET
+        </button>
+    </div>
+
+    <canvas id="sheepCanvas"></canvas>
+
+    <footer>
+        <div class="footer-content">
+            <a href="index.html">← Back to Home</a>
+            <a href="wubi.html">Wubi Input</a>
+            <div class="social-links">
+                <a href="https://x.com/ToviDing" target="_blank" class="social-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                </a>
+                <a href="https://www.printables.com/" target="_blank" class="social-icon">
+                    <div class="w-4 h-4 bg-current rounded flex items-center justify-center">
+                        <span class="text-xs font-bold">P</span>
+                    </div>
+                </a>
+                <a href="https://www.instagram.com/" target="_blank" class="social-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('sheepCanvas');
+        const ctx = canvas.getContext('2d');
+        const counterEl = document.getElementById('counter');
+        const chaosRange = document.getElementById('chaosRange');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        let width, height;
+        let sheepCount = 0;
+        let sheepArray = [];
+        let isRunning = true;
+        let lastSpawn = 0;
+
+        // Resize handler
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Sheep {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                const side = Math.floor(Math.random() * 4);
+                const speedMult = parseInt(chaosRange.value);
+                
+                // Randomize spawn position around the edges
+                if (side === 0) { // Top
+                    this.x = Math.random() * width;
+                    this.y = -100;
+                } else if (side === 1) { // Right
+                    this.x = width + 100;
+                    this.y = Math.random() * height;
+                } else if (side === 2) { // Bottom
+                    this.x = Math.random() * width;
+                    this.y = height + 100;
+                } else { // Left
+                    this.x = -100;
+                    this.y = Math.random() * height;
+                }
+
+                // Aim towards center-ish with high speed
+                const targetX = width / 2 + (Math.random() - 0.5) * width;
+                const targetY = height / 2 + (Math.random() - 0.5) * height;
+                const angle = Math.atan2(targetY - this.y, targetX - this.x);
+                
+                const baseSpeed = 10 + Math.random() * 20;
+                this.vx = Math.cos(angle) * baseSpeed * (speedMult / 5);
+                this.vy = Math.sin(angle) * baseSpeed * (speedMult / 5);
+                
+                this.size = 20 + Math.random() * 40;
+                this.rotation = 0;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.5;
+                this.counted = false;
+                this.active = true;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.rotation += this.rotationSpeed;
+
+                // Check if it's on screen to count it
+                if (!this.counted && this.x > 0 && this.x < width && this.y > 0 && this.y < height) {
+                    sheepCount++;
+                    counterEl.innerText = sheepCount;
+                    this.counted = true;
+                }
+
+                // Deactivate if far off screen
+                if (this.x < -300 || this.x > width + 300 || this.y < -300 || this.y > height + 300) {
+                    this.active = false;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                // Drawing a simple fluffy sheep with SVG-like paths
+                // Body
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Head
+                ctx.fillStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.ellipse(this.size * 0.7, 0, this.size * 0.4, this.size * 0.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Eyes
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(this.size * 0.8, -this.size * 0.1, 2, 0, Math.PI * 2);
+                ctx.arc(this.size * 0.8, this.size * 0.1, 2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+
+        function animate(timestamp) {
+            if (!isRunning) {
+                requestAnimationFrame(animate);
+                return;
+            }
+
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.3)'; // Trail effect
+            ctx.fillRect(0, 0, width, height);
+
+            // Spawn new sheep based on chaos level
+            const spawnRate = 500 / (chaosRange.value / 2);
+            if (timestamp - lastSpawn > width && timestamp - lastSpawn > spawnRate) {
+                sheepArray.push(new Sheep());
+                lastSpawn = timestamp;
+            } else if (timestamp - lastSpawn > spawnRate) {
+                 sheepArray.push(new Sheep());
+                lastSpawn = timestamp;
+            }
+
+            // Update and draw
+            for (let i = sheepArray.length - 1; i >= 0; i--) {
+                const s = sheepArray[i];
+                s.update();
+                s.draw();
+                if (!s.active) {
+                    sheepArray.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        toggleBtn.onclick = () => {
+            isRunning = !isRunning;
+            toggleBtn.innerText = isRunning ? "PAUSE" : "RESUME";
+            toggleBtn.className = isRunning 
+                ? "bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition-colors"
+                : "bg-red-500 text-white px-6 py-2 rounded-full font-bold hover:bg-red-600 transition-colors";
+        };
+
+        resetBtn.onclick = () => {
+            sheepCount = 0;
+            counterEl.innerText = "0";
+            sheepArray = [];
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, width, height);
+        };
+
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
