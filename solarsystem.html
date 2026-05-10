@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Solar System - Relative Scale</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+    body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Inter', sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .ui-overlay { pointer-events: none; }
+    .interactive { pointer-events: auto; }
+</style>
+</head>
+<body>
+
+    <div class="fixed inset-0 ui-overlay flex flex-col justify-between p-6 z-10">
+    <header class="flex justify-between items-start">
+        <div class="bg-black/60 border border-white/10 p-4 rounded-2xl max-w-xs backdrop-blur-md">
+            <h1 class="text-white text-2xl font-extrabold tracking-tighter uppercase">True <span class="text-yellow-400">Void</span></h1>
+            <p class="text-gray-400 text-xs mt-1 leading-relaxed">Actual relative sizes and orbital distances (AU) applied. Space is mostly empty.</p>
+        </div>
+            
+            <div class="bg-black/40 backdrop-blur-md border border-white/10 p-4 rounded-2xl">
+                <div id="planet-info" class="text-white text-right">
+                    <p class="text-xs uppercase tracking-widest text-blue-400 font-bold">Relative Scale Mode</p>
+                    <p class="text-lg font-bold" id="current-object">Real Diameters Applied</p>
+                </div>
+            </div>
+        </header>
+
+    <div class="absolute right-6 top-1/2 -translate-y-1/2 flex flex-col gap-2 bg-black/40 p-3 rounded-2xl border border-white/10 interactive max-h-[70vh] overflow-y-auto backdrop-blur-md">
+        <p class="text-[10px] text-white/40 uppercase tracking-widest text-center mb-2">Focus Target</p>
+        <button onclick="focusPlanet(null)" class="px-4 py-2 rounded-lg bg-white/10 text-white text-xs hover:bg-white/20 transition-all text-left flex items-center gap-2 border border-white/5">
+            <span class="w-2 h-2 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]"></span> Sun (Center)
+        </button>
+        <div class="w-full h-px bg-white/10 my-1"></div>
+        <div id="planet-nav-list" class="flex flex-col gap-1">
+            <!-- Buttons will be injected here -->
+        </div>
+    </div>
+
+    <footer class="flex justify-center mb-4">
+            <div class="bg-black/60 backdrop-blur-xl border border-white/20 px-6 py-3 rounded-full flex gap-6 items-center interactive">
+                <div class="text-white text-xs">
+                    <span class="block opacity-50 uppercase">Drag</span>
+                    <span class="font-bold">Rotate</span>
+                </div>
+                <div class="w-px h-6 bg-white/20"></div>
+                <div class="text-white text-xs">
+                    <span class="block opacity-50 uppercase">Scroll</span>
+                    <span class="font-bold">Zoom</span>
+                </div>
+                <div class="w-px h-6 bg-white/20"></div>
+                <button onclick="toggleOrbits()" class="text-white text-xs hover:text-blue-400 transition-colors">
+                    <span class="block opacity-50 uppercase">Toggle</span>
+                    <span class="font-bold" id="orbit-btn">Hide Paths</span>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+<script>
+    let scene, camera, renderer; // Removed starField
+    let planets = [];
+    let orbits = [];
+    let isOrbitVisible = true;
+    
+    let focusedPlanet = null; // Stores the currently focused planet object
+    let targetCameraPosition = new THREE.Vector3();
+    let currentLookAt = new THREE.Vector3(0, 0, 0);
+    
+    let isMouseDown = false;
+    let mouseX = 0, mouseY = 0;
+    let targetRotationX = 0.5;
+    let targetRotationY = 0.5;
+    let currentRotationX = 0.5;
+    let currentRotationY = 0.5;
+    let zoom = 1500; // Much further starting zoom for true scale
+
+    // Distances are in AU (1 AU = 400 units in this simulation)
+    // Sizes are relative to Earth (1.0)
+    const AU = 400; 
+    const PLANET_DATA = [
+        { name: "Mercury", color: 0x8c8c8c, size: 0.38, distance: 0.39 * AU, speed: 0.047 },
+        { name: "Venus", color: 0xe3bb76, size: 0.95, distance: 0.72 * AU, speed: 0.035 },
+        { name: "Earth", color: 0x2271b3, size: 1.0, distance: 1.00 * AU, speed: 0.029 },
+        { name: "Mars", color: 0xe27b58, size: 0.53, distance: 1.52 * AU, speed: 0.024 },
+        { name: "Jupiter", color: 0xd39c7e, size: 11.2, distance: 5.20 * AU, speed: 0.013 },
+        { name: "Saturn", color: 0xc5ab6e, size: 9.45, distance: 9.54 * AU, speed: 0.009, rings: true },
+        { name: "Uranus", color: 0xb5e3e3, size: 4.0, distance: 19.2 * AU, speed: 0.006 },
+        { name: "Neptune", color: 0x6081ff, size: 3.88, distance: 30.1 * AU, speed: 0.005 }
+    ];
+
+    function init() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000); // Absolute black
+
+        // Camera 'far' plane set to 50,000 to see Neptune at 12,000+ units
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 50000);
+        
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0x222222);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.PointLight(0xffffff, 2, 20000);
+        scene.add(sunLight);
+
+        // Sun is ~109x Earth radius
+        const sunGeometry = new THREE.SphereGeometry(109, 64, 64);
+        const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffdd00 });
+        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+        scene.add(sun);
+
+        // Starfield generation removed for "Entirely Black" background requirement
+
+        PLANET_DATA.forEach(data => {
+            // Orbit path
+            const orbitCurve = new THREE.EllipseCurve(0, 0, data.distance, data.distance);
+            const points = orbitCurve.getPoints(256); // Smoother lines for large orbits
+            const orbitGeometry = new THREE.BufferGeometry().setFromPoints(points);
+            const orbitMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.15 });
+            const orbitLine = new THREE.Line(orbitGeometry, orbitMaterial);
+            orbitLine.rotation.x = Math.PI / 2;
+            scene.add(orbitLine);
+            orbits.push(orbitLine);
+
+            // Planet mesh
+            const planetGeometry = new THREE.SphereGeometry(data.size, 32, 32);
+            const planetMaterial = new THREE.MeshStandardMaterial({ 
+                color: data.color,
+                roughness: 0.8,
+                metalness: 0.1
+            });
+            const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+            
+            if (data.rings) {
+                const ringGeometry = new THREE.TorusGeometry(data.size * 2.2, 0.5, 2, 100);
+                const ringMaterial = new THREE.MeshStandardMaterial({ 
+                    color: data.color, 
+                    transparent: true, 
+                    opacity: 0.4 
+                });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                ring.rotation.x = Math.PI / 2.1;
+                planet.add(ring);
+            }
+
+            const planetGroup = new THREE.Group();
+            planetGroup.add(planet);
+            scene.add(planetGroup);
+
+            const planetObj = {
+                mesh: planet,
+                group: planetGroup,
+                data: data,
+                angle: Math.random() * Math.PI * 2
+            };
+            planets.push(planetObj);
+
+            const navList = document.getElementById('planet-nav-list');
+            const btn = document.createElement('button');
+            btn.className = "px-4 py-2 rounded-lg bg-white/5 text-white/70 text-xs hover:bg-white/10 transition-all text-left border border-white/0 hover:border-white/10";
+            btn.innerHTML = `${data.name}`;
+            btn.onclick = () => focusPlanet(planetObj);
+            navList.appendChild(btn);
+        });
+
+        window.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+        window.addEventListener('wheel', onMouseWheel);
+        window.addEventListener('resize', onWindowResize);
+    }
+
+    function focusPlanet(planet) {
+        focusedPlanet = planet;
+        const infoEl = document.getElementById('current-object');
+        
+        if (planet) {
+            infoEl.innerText = planet.data.name;
+            infoEl.style.color = `#${planet.data.color.toString(16).padStart(6, '0')}`;
+            // Adjust zoom based on planet size so it fills the screen nicely
+            zoom = planet.data.size * 5 + 20; 
+        } else {
+            infoEl.innerText = "System Overview";
+            infoEl.style.color = "#ffffff";
+            zoom = 1500;
+            targetRotationX = 0.5;
+            targetRotationY = 0.5;
+        }
+    }
+
+    function onMouseDown(e) { isMouseDown = true; mouseX = e.clientX; mouseY = e.clientY; }
+    function onMouseUp() { isMouseDown = false; }
+
+    function onMouseMove(e) {
+        if (!isMouseDown) return;
+        const deltaX = e.clientX - mouseX;
+        const deltaY = e.clientY - mouseY;
+        targetRotationY += deltaX * 0.005;
+        targetRotationX += deltaY * 0.005;
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    }
+
+    function onMouseWheel(e) {
+        zoom += e.deltaY * 2.0; // Increased zoom speed for vast distances
+        zoom = Math.max(150, Math.min(zoom, 40000));
+    }
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function toggleOrbits() {
+        isOrbitVisible = !isOrbitVisible;
+        orbits.forEach(o => o.visible = isOrbitVisible);
+        document.getElementById('orbit-btn').innerText = isOrbitVisible ? "Hide Paths" : "Show Paths";
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        currentRotationX += (targetRotationX - currentRotationX) * 0.05;
+        currentRotationY += (targetRotationY - currentRotationY) * 0.05;
+
+        // Calculate relative camera offset from focal point
+        const offsetX = zoom * Math.sin(currentRotationY) * Math.cos(currentRotationX);
+        const offsetY = zoom * Math.sin(currentRotationX);
+        const offsetZ = zoom * Math.cos(currentRotationY) * Math.cos(currentRotationX);
+
+        let targetX = 0, targetY = 0, targetZ = 0;
+
+        planets.forEach(p => {
+            p.angle += p.data.speed * 0.1; 
+            p.mesh.position.x = Math.cos(p.angle) * p.data.distance;
+            p.mesh.position.z = Math.sin(p.angle) * p.data.distance;
+            p.mesh.rotation.y += 0.01;
+
+            // If this is the planet we are focusing on, update the target lookAt
+            if (focusedPlanet === p) {
+                targetX = p.mesh.position.x;
+                targetY = p.mesh.position.y;
+                targetZ = p.mesh.position.z;
+            }
+        });
+
+        // Smoothly move the focal point (lookAt)
+        currentLookAt.x += (targetX - currentLookAt.x) * 0.08;
+        currentLookAt.y += (targetY - currentLookAt.y) * 0.08;
+        currentLookAt.z += (targetZ - currentLookAt.z) * 0.08;
+
+        camera.position.set(
+            currentLookAt.x + offsetX,
+            currentLookAt.y + offsetY,
+            currentLookAt.z + offsetZ
+        );
+        
+        camera.lookAt(currentLookAt);
+
+        renderer.render(scene, camera);
+    }
+
+    window.onload = () => {
+        init();
+        animate();
+    };
+</script>
+</body>
+</html>
