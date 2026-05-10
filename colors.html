@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velvet Entropy // Pure</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0f1115;
+            cursor: crosshair;
+        }
+
+        canvas {
+            display: block;
+            filter: blur(4px) contrast(1.2); /* Softens the strokes into a watercolor effect */
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="mainCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let particles = [];
+        let isMonotone = false;
+        let mouse = { x: -1000, y: -1000, down: false };
+        let baseHue = Math.random() * 360;
+
+        // Visual constants (previously controlled by sliders)
+        const PARTICLE_COUNT = 150;
+        const DEFAULT_SIZE = 70;
+        const DEFAULT_SPEED = 45;
+
+        const softHues = [
+            { h: 210, s: 25, l: 65 }, // Muted Blue
+            { h: 275, s: 20, l: 70 }, // Lavender
+            { h: 155, s: 18, l: 68 }, // Sage
+            { h: 335, s: 25, l: 75 }, // Rose
+            { h: 35, s: 25, l: 75 }   // Sand
+        ];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initSwarm();
+        }
+
+        window.addEventListener('resize', resize);
+        
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        window.addEventListener('mousedown', () => mouse.down = true);
+        window.addEventListener('mouseup', () => mouse.down = false);
+        
+        // Double click to switch palette modes
+        window.addEventListener('dblclick', () => {
+            toggleMode();
+        });
+
+        class Blender {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.history = [];
+                this.historyLimit = 30;
+                this.setAppearance();
+            }
+
+            setAppearance() {
+                if (!isMonotone) {
+                    const palette = softHues[Math.floor(Math.random() * softHues.length)];
+                    this.h = palette.h + (Math.random() * 30 - 15);
+                    this.s = palette.s;
+                    this.l = palette.l;
+                } else {
+                    this.h = baseHue + (Math.random() * 40 - 20);
+                    this.s = 15;
+                    this.l = 55 + (Math.random() * 20);
+                }
+                this.color = `hsla(${this.h}, ${this.s}%, ${this.l}%, 0.12)`;
+            }
+
+            update() {
+                const speedMult = DEFAULT_SPEED / 40;
+                
+                // Vortex physics
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < 500) {
+                    const strength = (500 - dist) / 500;
+                    const force = mouse.down ? 1.2 : 0.25;
+                    this.vx += (dx / dist) * force * speedMult;
+                    this.vy += (dy / dist) * force * speedMult;
+                }
+
+                // Natural drift
+                this.vx += (Math.random() - 0.5) * 0.15;
+                this.vy += (Math.random() - 0.5) * 0.15;
+
+                // Viscosity/Friction
+                this.vx *= 0.94;
+                this.vy *= 0.94;
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Screen wrapping
+                if (this.x < -100) this.x = width + 100;
+                if (this.x > width + 100) this.x = -100;
+                if (this.y < -100) this.y = height + 100;
+                if (this.y > height + 100) this.y = -100;
+
+                this.history.push({ x: this.x, y: this.y });
+                if (this.history.length > this.historyLimit) {
+                    this.history.shift();
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = DEFAULT_SIZE;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                if (this.history.length > 1) {
+                    ctx.moveTo(this.history[0].x, this.history[0].y);
+                    for (let i = 1; i < this.history.length; i++) {
+                        const xc = (this.history[i].x + this.history[i - 1].x) / 2;
+                        const yc = (this.history[i].y + this.history[i - 1].y) / 2;
+                        ctx.quadraticCurveTo(this.history[i - 1].x, this.history[i - 1].y, xc, yc);
+                    }
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function initSwarm() {
+            particles = [];
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particles.push(new Blender());
+            }
+        }
+
+        function toggleMode() {
+            isMonotone = !isMonotone;
+            baseHue = Math.random() * 360;
+            particles.forEach(p => {
+                p.history = [];
+                p.setAppearance();
+            });
+        }
+
+        function animate() {
+            // Soft cumulative fade for the "blender" effect
+            ctx.fillStyle = 'rgba(15, 17, 21, 0.07)'; 
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.globalCompositeOperation = 'screen';
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            ctx.globalCompositeOperation = 'source-over';
+            requestAnimationFrame(animate);
+        }
+
+        window.onload = () => {
+            resize();
+            animate();
+        };
+    </script>
+</body>
+</html>
