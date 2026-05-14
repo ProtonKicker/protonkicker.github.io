@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Graph (Kn) Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow: hidden;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        input[type=range] {
+            accent-color: #38bdf8;
+        }
+
+        canvas {
+            touch-action: none;
+        }
+
+        .math-font {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4">
+
+    <div class="z-10 w-full max-w-4xl flex flex-col gap-6">
+        <header class="text-center space-y-2">
+            <h1 class="text-4xl font-extrabold tracking-tight text-white">
+                Complete Graph <span class="text-sky-400">Visualizer</span>
+            </h1>
+            <p class="text-slate-400 text-lg">Visualizing the case where a graph has exactly <span class="math-font text-sky-300">nC2</span> edges.</p>
+        </header>
+
+        <div class="glass p-6 rounded-3xl shadow-2xl flex flex-col md:flex-row gap-8 items-center">
+            <!-- Controls Area -->
+            <div class="flex-1 w-full space-y-6">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-end">
+                        <label class="text-sm font-semibold uppercase tracking-wider text-slate-400">Number of Vertices (n)</label>
+                        <span id="n-display" class="text-4xl font-bold text-sky-400">5</span>
+                    </div>
+                    <input type="range" id="n-slider" min="1" max="25" value="5" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <div class="p-4 bg-slate-900/50 rounded-2xl border border-white/5 space-y-3">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400 uppercase">Edge Calculation:</span>
+                        <span class="math-font text-sky-300 text-lg">n(n - 1) / 2</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400 uppercase font-semibold">Total Edges:</span>
+                        <span id="edge-display" class="text-3xl font-bold text-emerald-400">10</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualization Canvas Container -->
+            <div class="relative aspect-square w-full max-w-[400px] bg-slate-900/80 rounded-2xl overflow-hidden border border-white/10">
+                <canvas id="graphCanvas" class="w-full h-full"></canvas>
+            </div>
+        </div>
+
+        <footer class="text-center text-slate-500 text-sm italic">
+            "In a Complete Graph (K<sub>n</sub>), every pair of distinct vertices is connected by a unique edge."
+        </footer>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+        const nSlider = document.getElementById('n-slider');
+        const nDisplay = document.getElementById('n-display');
+        const edgeDisplay = document.getElementById('edge-display');
+
+        let n = parseInt(nSlider.value);
+        let rotation = 0;
+        let targetN = n;
+        let currentDisplayN = n; // For smooth transitions
+
+        function resize() {
+            const size = canvas.parentElement.offsetWidth;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = size * dpr;
+            canvas.height = size * dpr;
+            ctx.scale(dpr, dpr);
+            canvas.style.width = size + 'px';
+            canvas.style.height = size + 'px';
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        function draw() {
+            const width = canvas.width / (window.devicePixelRatio || 1);
+            const height = canvas.height / (window.devicePixelRatio || 1);
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = (width / 2) * 0.8;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Update smooth display values
+            currentDisplayN += (n - currentDisplayN) * 0.1;
+            const drawN = Math.floor(n);
+            
+            // Calculate coordinates for all vertices
+            const vertices = [];
+            for (let i = 0; i < drawN; i++) {
+                const angle = (i / drawN) * Math.PI * 2 + rotation;
+                vertices.push({
+                    x: centerX + Math.cos(angle) * radius,
+                    y: centerY + Math.sin(angle) * radius
+                });
+            }
+
+            ctx.lineWidth = drawN > 15 ? 0.5 : 1.5;
+            
+            for (let i = 0; i < vertices.length; i++) {
+                for (let j = i + 1; j < vertices.length; j++) {
+                    // Gradient or subtle color for edges
+                    const opacity = Math.min(1, 4 / drawN);
+                    ctx.strokeStyle = `rgba(56, 189, 248, ${opacity})`;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(vertices[i].x, vertices[i].y);
+                    ctx.lineTo(vertices[j].x, vertices[j].y);
+                    ctx.stroke();
+                }
+            }
+
+            vertices.forEach((v, index) => {
+                // Glow effect
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#38bdf8';
+                
+                ctx.fillStyle = '#f8fafc';
+                ctx.beginPath();
+                ctx.arc(v.x, v.y, drawN > 15 ? 3 : 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.shadowBlur = 0;
+            });
+
+            rotation += 0.002; // Subtle rotation
+            requestAnimationFrame(draw);
+        }
+
+        nSlider.addEventListener('input', (e) => {
+            n = parseInt(e.target.value);
+            nDisplay.innerText = n;
+            
+            // nC2 formula calculation
+            const edges = (n * (n - 1)) / 2;
+            edgeDisplay.innerText = edges;
+        });
+
+        // Initialize display
+        const initialEdges = (n * (n - 1)) / 2;
+        edgeDisplay.innerText = initialEdges;
+
+        window.onload = () => {
+            draw();
+        };
+    </script>
+</body>
+</html>
