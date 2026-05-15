@@ -1,1 +1,1 @@
-(index.html is a source file, so according to rule 6, since there are no build artifacts, dependencies, or temp files in the changes, output nothing)
+Nothing needs to be added to .gitignore since the changes only include HTML files (`.html`) which are source/config files and not build artifacts, dependencies, or temporary files.
