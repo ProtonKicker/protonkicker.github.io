@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principle of Inclusion-Exclusion Visualizer</title>
+    <script src="https://cdn.tailwindcss.com "></script>
+    <script src="https://unpkg.com/ @phosphor-icons/web"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans selection:bg-blue-500/30">
+    
+    <div class="max-w-6xl mx-auto space-y-6">
+        <!-- Header -->
+        <div class="space-y-2">
+            <h1 class="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+                Principle of Inclusion-Exclusion Visualizer
+            </h1>
+            <p class="text-slate-400 max-w-3xl leading-relaxed">
+                Drag the sets to create overlaps. The formula automatically updates based on which sets physically intersect. 
+                Notice how pairs are subtracted, triples are added back, and quadruples are subtracted again.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Column: Canvas & Controls -->
+            <div class="flex flex-col space-y-4">
+                
+                <!-- Control Panel -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center justify-between shadow-xl">
+                    <div class="space-y-1">
+                        <label class="text-sm font-medium text-slate-300">Number of Variables</label>
+                        <div class="text-xs text-slate-500">Scale up to 6 distinct sets</div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span id="num-sets-label" class="text-xl font-bold w-6 text-center text-blue-400">3</span>
+                        <input 
+                            id="num-sets-slider"
+                            type="range" 
+                            min="1" 
+                            max="6" 
+                            value="3" 
+                            class="w-32 accent-blue-500 cursor-pointer"
+                        />
+                    </div>
+                </div>
+
+                <!-- Interactive SVG Canvas -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative">
+                    <div class="absolute top-4 left-4 flex items-center space-x-2 text-slate-500 text-sm bg-slate-950/50 px-3 py-1.5 rounded-full backdrop-blur-sm pointer-events-none z-10">
+                        <i class="ph ph-dots-six text-lg"></i>
+                        <span>Drag to overlap sets</span>
+                    </div>
+                    
+                    <svg 
+                        id="svg-canvas"
+                        viewBox="0 0 500 400" 
+                        class="w-full h-auto touch-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjA1KSIvPjwvc3ZnPg==')]"
+                    >
+                        <!-- Connections rendered here dynamically -->
+                        <g id="svg-connections"></g>
+                        <!-- Circles rendered here dynamically -->
+                        <g id="svg-circles"></g>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Right Column: Dynamic Formula -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col h-full">
+                <div class="flex items-center space-x-2 mb-6 pb-4 border-b border-slate-800">
+                    <i class="ph-fill ph-info text-emerald-400 text-xl"></i>
+                    <h2 class="text-lg font-semibold text-slate-200">Probability Formula</h2>
+                </div>
+                
+                <div id="formula-container" class="flex-1 overflow-y-auto space-y-6">
+                    <!-- Dynamic formula content injected here -->
+                </div>
+                
+                <div class="mt-8 pt-4 border-t border-slate-800 text-xs text-slate-500 leading-relaxed">
+                    <strong>Tip:</strong> Hover over any term in the formula to highlight the exact intersection region in the diagram.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Constants & State ---
+        const COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+        const LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
+        const R = 70; // Circle radius
+        
+        let numSets = 3;
+        let sets = [];
+        let draggingSet = null;
+        let hoverSubsetIds = null;
+        let dragOffset = { x: 0, y: 0 };
+        let formulaUpdateQueued = false;
+
+        // --- DOM Elements ---
+        const slider = document.getElementById('num-sets-slider');
+        const numLabel = document.getElementById('num-sets-label');
+        const svgCanvas = document.getElementById('svg-canvas');
+        const svgCirclesGroup = document.getElementById('svg-circles');
+        const svgConnectionsGroup = document.getElementById('svg-connections');
+        const formulaContainer = document.getElementById('formula-container');
+
+        // --- Geometric & Math Helpers ---
+        function getDistance(p1, p2) {
+            return Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        }
+
+        function getPairIntersections(c1, c2, r) {
+            const d = getDistance(c1, c2);
+            if (d > 2 * r || d < 0.01) return [];
+
+            const a = d / 2;
+            const h = Math.sqrt(Math.max(0, r * r - a * a));
+
+            const mx = (c1.x + c2.x) / 2;
+            const my = (c1.y + c2.y) / 2;
+
+            const dx = c2.x - c1.x;
+            const dy = c2.y - c1.y;
+
+            return [
+                { x: mx - h * (dy / d), y: my + h * (dx / d) },
+                { x: mx + h * (dy / d), y: my - h * (dx / d) }
+            ];
+        }
+
+        function doesSubsetIntersect(subset, r) {
+            if (subset.length === 1) return true;
+            if (subset.length === 2) {
+                return getDistance(subset[0], subset[1]) < 2 * r - 0.5;
+            }
+
+            let hasIntersection = false;
+            for (let i = 0; i < subset.length; i++) {
+                for (let j = i + 1; j < subset.length; j++) {
+                    const pts = getPairIntersections(subset[i], subset[j], r);
+                    for (const pt of pts) {
+                        let insideAll = true;
+                        for (let k = 0; k < subset.length; k++) {
+                            if (k === i || k === j) continue;
+                            if (getDistance(pt, subset[k]) > r + 0.5) {
+                                insideAll = false;
+                                break;
+                            }
+                        }
+                        if (insideAll) {
+                            hasIntersection = true;
+                            break;
+                        }
+                    }
+                    if (hasIntersection) break;
+                }
+                if (hasIntersection) break;
+            }
+            return hasIntersection;
+        }
+
+        function getCombinations(arr) {
+            const result = [];
+            const f = (prefix, remaining) => {
+                for (let i = 0; i < remaining.length; i++) {
+                    const newPrefix = [...prefix, remaining[i]];
+                    result.push(newPrefix);
+                    f(newPrefix, remaining.slice(i + 1));
+                }
+            };
+            f([], arr);
+            return result;
+        }
+
+        // --- Core Application Logic ---
+
+        function updateSetsCount() {
+            if (numSets > sets.length) {
+                for (let i = sets.length; i < numSets; i++) {
+                    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+                    const dist = 60 + Math.random() * 20;
+                    sets.push({
+                        id: i,
+                        label: LABELS[i],
+                        color: COLORS[i],
+                        x: 250 + Math.cos(angle) * dist,
+                        y: 200 + Math.sin(angle) * dist
+                    });
+                }
+            } else if (numSets < sets.length) {
+                sets = sets.slice(0, numSets);
+            }
+            
+            buildSVGElements();
+            queueFormulaUpdate();
+        }
+
+        // Creates SVG elements (avoids destroying/recreating during drag)
+        function buildSVGElements() {
+            svgCirclesGroup.innerHTML = '';
+            
+            sets.forEach(set => {
+                const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                group.dataset.id = set.id;
+                
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute('cx', set.x);
+                circle.setAttribute('cy', set.y);
+                circle.setAttribute('r', R);
+                circle.setAttribute('fill', set.color);
+                circle.setAttribute('stroke', set.color);
+                circle.setAttribute('style', 'mix-blend-mode: screen;');
+                circle.classList.add('cursor-grab', 'active:cursor-grabbing', 'transition-all', 'duration-200');
+                circle.dataset.type = 'draggable';
+                circle.dataset.id = set.id;
+                
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute('x', set.x);
+                text.setAttribute('y', set.y);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'central');
+                text.setAttribute('fill', 'white');
+                text.classList.add('pointer-events-none', 'font-bold', 'text-xl', 'drop-shadow-md', 'select-none', 'transition-opacity', 'duration-200');
+                text.textContent = set.label;
+
+                group.appendChild(circle);
+                group.appendChild(text);
+                svgCirclesGroup.appendChild(group);
+            });
+            
+            updateStyles();
+        }
+
+        // Updates position of elements during high-priority drag
+        function syncSVGPositions() {
+            sets.forEach(set => {
+                const group = document.querySelector(`g[data-id="${set.id}"]`);
+                if (group) {
+                    const circle = group.querySelector('circle');
+                    const text = group.querySelector('text');
+                    circle.setAttribute('cx', set.x);
+                    circle.setAttribute('cy', set.y);
+                    text.setAttribute('x', set.x);
+                    text.setAttribute('y', set.y);
+                }
+            });
+        }
+
+        // Render connections (dashed lines between overlaps)
+        function renderConnections() {
+            let connectionsHTML = '';
+            for (let i = 0; i < sets.length; i++) {
+                for (let j = i + 1; j < sets.length; j++) {
+                    const s1 = sets[i];
+                    const s2 = sets[j];
+                    if (getDistance(s1, s2) < 2 * R) {
+                        connectionsHTML += `<line x1="${s1.x}" y1="${s1.y}" x2="${s2.x}" y2="${s2.y}" stroke="rgba(255,255,255,0.05)" stroke-width="2" stroke-dasharray="4 4" />`;
+                    }
+                }
+            }
+            svgConnectionsGroup.innerHTML = connectionsHTML;
+        }
+
+        // Render formula safely in background
+        function renderFormula() {
+            const allSubsets = getCombinations(sets);
+            const validSubsets = allSubsets.filter(sub => doesSubsetIntersect(sub, R));
+            
+            const grouped = {};
+            validSubsets.forEach(sub => {
+                const len = sub.length;
+                if (!grouped[len]) grouped[len] = [];
+                grouped[len].push(sub);
+            });
+
+            const degrees = Object.keys(grouped).map(Number).sort((a, b) => a - b);
+            
+            let html = '';
+
+            // Main Union Definition
+            let unionHTML = sets.map((s, i) => `
+                <span style="color: ${s.color}" class="font-bold">${s.label}</span>
+                ${i < sets.length - 1 ? '<span class="mx-1 text-slate-500">∪</span>' : ''}
+            `).join('');
+
+            html += `
+                <div class="text-2xl font-serif italic text-slate-100 flex items-center mb-6">
+                    P(${unionHTML}) <span class="ml-3 text-slate-400">=</span>
+                </div>
+            `;
+
+            if (degrees.length === 0) {
+                html += `<div class="text-slate-500 italic px-4 py-8 text-center bg-slate-950/50 rounded-xl">Add some variables to begin.</div>`;
+            } else {
+                html += `<div class="space-y-5">`;
+                
+                degrees.forEach(degree => {
+                    const terms = grouped[degree];
+                    const isOdd = degree % 2 === 1;
+                    const sign = isOdd ? '+' : '-';
+                    const actionWord = isOdd ? 'Add' : 'Subtract';
+                    const degreeLabels = ['Individuals', 'Pairs', 'Triples', 'Quadruples', 'Quintuples', 'Sextuples'];
+                    const label = degreeLabels[degree - 1] || `${degree}-way overlaps`;
+                    
+                    const markerColor = isOdd ? '#10b981' : '#ef4444';
+                    const textColor = isOdd ? '#34d399' : '#f87171';
+
+                    let termsHTML = '';
+                    terms.forEach((term, idx) => {
+                        const subsetIds = term.map(t => t.id).join(',');
+                        
+                        let subsetDisplay = term.map((s, i) => `
+                            <span style="color: ${s.color}" class="font-bold mx-[1px]">${s.label}</span>
+                            ${i < term.length - 1 ? '<span class="mx-1 text-slate-600 font-sans text-sm">∩</span>' : ''}
+                        `).join('');
+
+                        termsHTML += `
+                            <div class="flex items-center formula-term" data-subset="${subsetIds}">
+                                ${(idx > 0 || degree > 1) ? `
+                                    <span class="mx-2 text-slate-500 font-mono font-bold text-lg">
+                                        ${(degree === 1 && idx > 0) ? '+' : sign}
+                                    </span>
+                                ` : ''}
+                                <span class="font-serif text-lg bg-slate-950 border border-slate-800 px-3 py-1 rounded-lg cursor-default hover:bg-slate-800 hover:border-slate-600 transition-all shadow-sm flex items-center">
+                                    <span class="text-slate-400 mr-1 italic">P(</span>
+                                    ${subsetDisplay}
+                                    <span class="text-slate-400 ml-1 italic">)</span>
+                                </span>
+                            </div>
+                        `;
+                    });
+
+                    html += `
+                        <div class="relative">
+                            <div class="absolute left-0 top-1 bottom-1 w-1 rounded-full opacity-50" style="background-color: ${markerColor}"></div>
+                            <div class="pl-4">
+                                <div class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: ${textColor}">
+                                    ${actionWord} ${label}
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    ${termsHTML}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            formulaContainer.innerHTML = html;
+        }
+
+        // Defers the heavy calculation
+        function queueFormulaUpdate() {
+            if (!formulaUpdateQueued) {
+                formulaUpdateQueued = true;
+                requestAnimationFrame(() => {
+                    renderConnections();
+                    renderFormula();
+                    formulaUpdateQueued = false;
+                });
+            }
+        }
+
+        // Highlights specific sets on formula hover
+        function updateStyles() {
+            sets.forEach(set => {
+                const group = document.querySelector(`g[data-id="${set.id}"]`);
+                if (!group) return;
+                
+                const circle = group.querySelector('circle');
+                const text = group.querySelector('text');
+                
+                const isHovered = hoverSubsetIds && hoverSubsetIds.includes(set.id);
+                const isDimmed = hoverSubsetIds && !isHovered;
+
+                circle.setAttribute('fill-opacity', isHovered ? "0.6" : isDimmed ? "0.05" : "0.3");
+                circle.setAttribute('stroke-width', isHovered ? "4" : "2");
+                circle.setAttribute('stroke-opacity', isDimmed ? "0.2" : "0.8");
+                text.setAttribute('opacity', isDimmed ? "0.2" : "1");
+            });
+        }
+
+        // Convert mouse/touch coords to SVG space
+        function getMousePosition(evt) {
+            const CTM = svgCanvas.getScreenCTM();
+            return {
+                x: (evt.clientX - CTM.e) / CTM.a,
+                y: (evt.clientY - CTM.f) / CTM.d
+            };
+        }
+
+        // --- Event Listeners ---
+
+        slider.addEventListener('input', (e) => {
+            numSets = parseInt(e.target.value);
+            numLabel.textContent = numSets;
+            updateSetsCount();
+        });
+
+        // Pointer Events (Unified Mouse & Touch)
+        svgCanvas.addEventListener('pointerdown', (e) => {
+            if (e.target.dataset.type === 'draggable') {
+                e.target.setPointerCapture(e.pointerId);
+                const id = parseInt(e.target.dataset.id);
+                draggingSet = sets.find(s => s.id === id);
+                
+                const pt = getMousePosition(e);
+                dragOffset.x = pt.x - draggingSet.x;
+                dragOffset.y = pt.y - draggingSet.y;
+            }
+        });
+
+        svgCanvas.addEventListener('pointermove', (e) => {
+            if (draggingSet) {
+                const pt = getMousePosition(e);
+                draggingSet.x = pt.x - dragOffset.x;
+                draggingSet.y = pt.y - dragOffset.y;
+                
+                syncSVGPositions(); // High priority update
+                queueFormulaUpdate(); // Deferred heavy update
+            }
+        });
+
+        const endDrag = (e) => {
+            if (draggingSet && e.target.dataset.type === 'draggable') {
+                e.target.releasePointerCapture(e.pointerId);
+            }
+            draggingSet = null;
+        };
+
+        svgCanvas.addEventListener('pointerup', endDrag);
+        svgCanvas.addEventListener('pointercancel', endDrag);
+
+        // Hover events via event delegation
+        formulaContainer.addEventListener('mouseover', (e) => {
+            const term = e.target.closest('.formula-term');
+            if (term) {
+                hoverSubsetIds = term.dataset.subset.split(',').map(Number);
+                updateStyles();
+            }
+        });
+
+        formulaContainer.addEventListener('mouseout', (e) => {
+            const term = e.target.closest('.formula-term');
+            if (term) {
+                hoverSubsetIds = null;
+                updateStyles();
+            }
+        });
+
+        // Init
+        updateSetsCount();
+
+    </script>
+</body>
+</html>
