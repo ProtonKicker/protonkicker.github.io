@@ -201,6 +201,13 @@
             <div class="relative w-full h-[180px] bg-white border border-gray-200 rounded-md overflow-hidden shadow-inner">
                 <canvas id="graph-canvas" class="w-full h-full block"></canvas>
             </div>
+            
+            <!-- How Monte Carlo Works Explanation -->
+            <div class="mt-2 p-3 bg-blue-50/60 border border-blue-100 rounded-md">
+                <p class="text-[11px] text-gray-600 leading-relaxed">
+                    <strong class="text-blue-700 font-semibold">How Monte Carlo Works:</strong> This method uses random sampling to estimate π. Points are randomly thrown at a square containing a quarter circle. Since the ratio of areas is π/4, counting points inside vs. total points gives us an approximation: π ≈ 4 × (inside points / total points). More samples = better accuracy!
+                </p>
+            </div>
         </div>
     </div>
 </main>
