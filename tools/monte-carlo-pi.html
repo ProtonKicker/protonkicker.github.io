@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monte Carlo Pi Estimator - Minimal WinUI 3</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif;
+            background-color: #f3f3f3; /* WinUI 3 Page Background */
+            color: #1c1c1c; /* Off-black */
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Acrylic / Mica visual effect mimicking WinUI 3 */
+        .winui-card {
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+            border-radius: 8px; /* Standard Windows 11 corner radius */
+            transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .winui-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+        }
+        /* Standard WinUI Button Style */
+        .btn-standard {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #2d2d2d;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-bottom-color: rgba(0, 0, 0, 0.2);
+            font-weight: 500;
+            border-radius: 4px;
+            transition: all 0.1s ease;
+        }
+        .btn-standard:hover {
+            background-color: rgba(240, 240, 240, 0.9);
+        }
+        .btn-standard:active {
+            background-color: rgba(230, 230, 230, 0.9);
+            transform: translateY(1px);
+        }
+        /* WinUI 3 Accent Button Style */
+        .btn-accent {
+            background-color: #0078d4;
+            color: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-bottom-color: rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+        .btn-accent:hover {
+            background-color: #006cc1;
+        }
+        .btn-accent:active {
+            background-color: #005a9e;
+            transform: translateY(1px);
+        }
+        /* Custom scrollbar matching Fluent Design */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f3f3f3;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cdcdcd;
+            border-radius: 4px;
+            border: 2px solid #f3f3f3;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a6a6a6;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+<!-- Header (Styled like a modern CommandBar/Navigation) -->
+<header class="border-b border-gray-200 bg-white/80 backdrop-blur-md px-6 py-3.5 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-[#0078d4] flex items-center justify-center shadow-sm">
+                <span class="font-bold text-white text-sm mono">π</span>
+            </div>
+            <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h1 class="text-base font-semibold tracking-tight text-gray-950">
+                        Monte Carlo Estimator
+                    </h1>
+                    <span id="simulation-status-badge" class="text-[10px] bg-amber-50 text-amber-700 font-semibold px-2 py-0.5 rounded border border-amber-100 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        Paused
+                    </span>
+                </div>
+                <p class="text-[11px] text-gray-500 font-medium">Random sampling approximation in real-time</p>
+            </div>
+        </div>
+
+        <!-- Controls Action Hub inside Header -->
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button id="btn-toggle" onclick="toggleSimulation()" class="btn-accent px-4 py-1.5 text-xs flex items-center gap-2 shadow-sm">
+                <i id="btn-toggle-icon" class="fa-solid fa-play"></i>
+                <span id="btn-toggle-text">Start Throwing</span>
+            </button>
+            <button id="btn-reset" onclick="resetSimulation()" class="btn-standard px-4 py-1.5 text-xs flex items-center gap-2">
+                <i class="fa-solid fa-rotate-left text-gray-500"></i>
+                <span>Reset Board</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Main Dashboard Container -->
+<main class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch my-auto">
+    
+    <!-- Left Column: The Simulation Canvas & Metrics -->
+    <div class="lg:col-span-6 flex flex-col gap-5 justify-center">
+        <!-- Interactive Arena Card -->
+        <div class="winui-card p-5 flex flex-col items-center justify-center relative overflow-hidden">
+            <!-- Canvas Simulation Viewport -->
+            <div class="relative w-full aspect-square max-w-[420px] bg-white border border-gray-200 rounded-lg overflow-hidden shadow-inner group cursor-crosshair">
+                <canvas id="simulation-canvas" class="w-full h-full block"></canvas>
+                <!-- Manual Touch/Click HUD Overlay -->
+                <div class="absolute inset-x-0 bottom-3 flex justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span class="bg-white/95 text-gray-600 text-xs py-1 px-3 rounded border border-gray-200 shadow-sm backdrop-blur">
+                        Click / Tap canvas to place coordinates manually
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Estimation Metrics Board -->
+            <div class="w-full mt-5 grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50/80 p-4 rounded-lg border border-gray-200/60">
+                <div class="text-center">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Total Points</p>
+                    <p id="stat-total" class="mono text-base font-bold text-gray-800 mt-0.5">0</p>
+                </div>
+                <div class="text-center border-l border-gray-200">
+                    <p class="text-[10px] text-emerald-600 uppercase tracking-wider font-semibold">Inside Circle</p>
+                    <p id="stat-inside" class="mono text-base font-bold text-emerald-600 mt-0.5">0</p>
+                </div>
+                <div class="text-center border-l border-gray-200">
+                    <p class="text-[10px] text-rose-600 uppercase tracking-wider font-semibold">Outside Box</p>
+                    <p id="stat-outside" class="mono text-base font-bold text-rose-500 mt-0.5">0</p>
+                </div>
+                <div class="text-center border-l border-gray-200">
+                    <p class="text-[10px] text-indigo-600 uppercase tracking-wider font-semibold">Ratio (×4)</p>
+                    <p id="stat-ratio" class="mono text-base font-bold text-indigo-700 mt-0.5">0.0000</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Live Precision telemetry and Convergence Graph -->
+    <div class="lg:col-span-6 flex flex-col gap-5 justify-center">
+        <!-- Live Precision Telemetry Display -->
+        <div class="winui-card p-6 bg-gradient-to-br from-white to-blue-50/10 relative overflow-hidden">
+            <p class="text-[11px] text-gray-500 uppercase tracking-widest font-bold">Estimated Pi Approximation</p>
+            
+            <div class="flex items-baseline gap-1 mt-1.5">
+                <span id="est-integer" class="text-4xl font-extrabold text-gray-950 tracking-tight mono">3.</span>
+                <span id="est-decimals" class="text-4xl font-extrabold text-gray-400 tracking-tight mono">000000</span>
+                <span id="real-pi-difference" class="ml-2 text-xs text-rose-600 mono font-semibold bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded">Err: +100%</span>
+            </div>
+            
+            <!-- Accuracy Bar -->
+            <div class="mt-4">
+                <div class="flex justify-between text-[10px] text-gray-500 font-bold mb-1.5">
+                    <span>ACCURACY INDICATOR</span>
+                    <span id="accuracy-percentage" class="text-emerald-600 mono">0.00%</span>
+                </div>
+                <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden border border-gray-200/60">
+                    <div id="accuracy-progress" class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Convergence History Graph -->
+        <div class="winui-card p-5 flex flex-col gap-3 relative">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-1.5">
+                    <span id="live-pulse" class="w-2.5 h-2.5 rounded-full bg-gray-400"></span>
+                    <h3 class="text-xs font-semibold text-gray-700 uppercase tracking-wider">Convergence History Curve</h3>
+                </div>
+                <span id="target-pi-tag" class="text-[10px] bg-gray-50 px-2 py-0.5 rounded border border-gray-200 text-gray-500 font-semibold mono">Target Value: 3.14159...</span>
+            </div>
+            
+            <!-- Mini Custom Canvas Line Graph -->
+            <div class="relative w-full h-[180px] bg-white border border-gray-200 rounded-md overflow-hidden shadow-inner">
+                <canvas id="graph-canvas" class="w-full h-full block"></canvas>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+const state = {
+    totalPoints: 0,
+    insidePoints: 0,
+    isRunning: false, // Start paused, let user trigger with play button
+    
+    // Historical estimates to render convergence curves
+    history: [],
+    historyLimit: 400,
+    
+    // Particle pool for canvas animations
+    particles: []
+};
+
+const TRUE_PI = Math.PI;
+
+/* 
+ * GRAPHICS AND UI REFERENCES
+ */
+const canvas = document.getElementById('simulation-canvas');
+const ctx = canvas.getContext('2d');
+const graphCanvas = document.getElementById('graph-canvas');
+const gCtx = graphCanvas.getContext('2d');
+</script>
+
+<script>
+function resizeCanvas() {
+    const parent = canvas.parentElement;
+    const clientWidth = parent ? parent.clientWidth : 0;
+    const size = Math.max(100, Math.min(clientWidth || 300, 420));
+    canvas.width = size * window.devicePixelRatio;
+    canvas.height = size * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+
+function resizeGraph() {
+    const parent = graphCanvas.parentElement;
+    const clientWidth = parent ? parent.clientWidth : 0;
+    const width = Math.max(100, clientWidth || 300);
+    graphCanvas.width = width * window.devicePixelRatio;
+    graphCanvas.height = 180 * window.devicePixelRatio;
+    gCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+
+window.addEventListener('resize', () => {
+    resizeCanvas();
+    resizeGraph();
+});
+
+resizeCanvas();
+resizeGraph();
+</script>
+
+<script>
+function getEstimatedPi() {
+    if (state.totalPoints === 0) return 0;
+    return 4 * (state.insidePoints / state.totalPoints);
+}
+
+const pointHistory = [];
+const maxRenderedPoints = 1500; // High-fidelity rendering limit
+
+function processNewPoint(x, y) {
+    const distanceSquared = x * x + y * y;
+    const isInside = distanceSquared <= 1.0;
+    
+    state.totalPoints++;
+    if (isInside) {
+        state.insidePoints++;
+    }
+
+    if (pointHistory.length < maxRenderedPoints) {
+        pointHistory.push({ x, y, isInside });
+    } else {
+        if (Math.random() < 0.2) {
+            const replaceIdx = Math.floor(Math.random() * maxRenderedPoints);
+            pointHistory[replaceIdx] = { x, y, isInside };
+        }
+    }
+
+    createParticle(x, y, isInside);
+
+    const currentEst = getEstimatedPi();
+    if (state.totalPoints % Math.max(1, Math.floor(state.totalPoints / 100)) === 0 || state.totalPoints < 100) {
+        state.history.push({ total: state.totalPoints, est: currentEst });
+        if (state.history.length > state.historyLimit) {
+            state.history.shift();
+        }
+    }
+
+    return isInside;
+}
+</script>
+
+<script>
+function createParticle(x, y, isInside) {
+    const scale = canvas.width / (2 * window.devicePixelRatio);
+    const renderX = (x + 1) * scale;
+    const renderY = (1 - y) * scale; 
+    
+    state.particles.push({
+        x: renderX,
+        y: renderY,
+        vx: (Math.random() - 0.5) * 4,
+        vy: (Math.random() - 0.5) * 4,
+        radius: Math.random() * 2.5 + 1.5,
+        alpha: 1.0,
+        decay: Math.random() * 0.04 + 0.04,
+        color: isInside ? '#0078d4' : '#d13438' 
+    });
+
+    if (state.particles.length > 200) {
+        state.particles.shift();
+    }
+}
+
+function updateAndDrawParticles(ctxInstance) {
+    for (let i = state.particles.length - 1; i >= 0; i--) {
+        const p = state.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= p.decay;
+        
+        if (p.alpha <= 0) {
+            state.particles.splice(i, 1);
+            continue;
+        }
+        
+        ctxInstance.save();
+        ctxInstance.globalAlpha = p.alpha;
+        ctxInstance.fillStyle = p.color;
+        ctxInstance.beginPath();
+        ctxInstance.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctxInstance.fill();
+        ctxInstance.restore();
+    }
+}
+</script>
+
+<script>
+function drawSimulation() {
+    const w = canvas.width / window.devicePixelRatio;
+    const h = canvas.height / window.devicePixelRatio;
+    
+    if (w <= 8 || h <= 8) return;
+    
+    const center = w / 2;
+    const radius = Math.max(1, w / 2 - 4); 
+    
+    // WinUI 3 Pure White Canvas Background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, w, h);
+    
+    // Light delicate gridlines
+    ctx.strokeStyle = '#f1f1f1';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2);
+    ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h);
+    ctx.stroke();
+
+    // Render Unit Circle boundary contour
+    ctx.strokeStyle = 'rgba(0, 120, 212, 0.25)'; /* Light Windows blue accent */
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(center, center, radius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Render registered simulated points inside the grid
+    const drawScale = radius;
+    for (let i = 0; i < pointHistory.length; i++) {
+        const p = pointHistory[i];
+        const screenX = center + p.x * drawScale;
+        const screenY = center - p.y * drawScale; 
+
+        // Smooth pastel colors optimized for light UI backgrounds
+        ctx.fillStyle = p.isInside ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.45)';
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    updateAndDrawParticles(ctx);
+
+    // Dynamic HUD on canvas corner
+    ctx.fillStyle = 'rgba(243, 243, 243, 0.8)';
+    ctx.fillRect(8, 8, 120, 24);
+    ctx.strokeStyle = '#e5e5e5';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(8, 8, 120, 24);
+    ctx.font = '10px "JetBrains Mono", monospace';
+    ctx.fillStyle = '#616161';
+    ctx.fillText(`Rendered: ${pointHistory.length}`, 14, 24);
+}
+
+function drawConvergenceGraph() {
+    const w = graphCanvas.width / window.devicePixelRatio;
+    const h = graphCanvas.height / window.devicePixelRatio;
+
+    gCtx.fillStyle = '#ffffff';
+    gCtx.fillRect(0, 0, w, h);
+
+    if (state.history.length === 0) {
+        gCtx.fillStyle = '#8a8a8a';
+        gCtx.font = '11px sans-serif';
+        gCtx.fillText('Click "Start Throwing" to plot convergence...', 20, h/2);
+        return;
+    }
+
+    // Grid lines for reference points
+    gCtx.strokeStyle = '#f7f7f7';
+    gCtx.lineWidth = 1;
+    for (let i = 1; i <= 4; i++) {
+        const yLine = (h / 5) * i;
+        gCtx.beginPath();
+        gCtx.moveTo(0, yLine);
+        gCtx.lineTo(w, yLine);
+        gCtx.stroke();
+    }
+
+    const yMin = 2.4;
+    const yMax = 3.8;
+    function getValY(val) {
+        const percent = (val - yMin) / (yMax - yMin);
+        return h - (percent * h);
+    }
+
+    const piY = getValY(TRUE_PI);
+    gCtx.strokeStyle = 'rgba(139, 92, 246, 0.4)'; /* Light violet line */
+    gCtx.lineWidth = 1.5;
+    gCtx.setLineDash([4, 4]);
+    gCtx.beginPath();
+    gCtx.moveTo(0, piY);
+    gCtx.lineTo(w, piY);
+    gCtx.stroke();
+    gCtx.setLineDash([]); 
+
+    gCtx.fillStyle = '#8b5cf6';
+    gCtx.font = '9px "JetBrains Mono", monospace';
+    gCtx.fillText("PI (3.1416)", 6, piY - 3);
+
+    // Draw active approximation lines
+    gCtx.strokeStyle = '#0078d4'; /* Accent Windows blue tracking */
+    gCtx.lineWidth = 2;
+    gCtx.beginPath();
+
+    const stepX = w / Math.max(1, state.history.length - 1);
+    for (let i = 0; i < state.history.length; i++) {
+        const pt = state.history[i];
+        const cx = i * stepX;
+        let cy = getValY(pt.est);
+        
+        if (cy < 0) cy = 0;
+        if (cy > h) cy = h;
+
+        if (i === 0) {
+            gCtx.moveTo(cx, cy);
+        } else {
+            gCtx.lineTo(cx, cy);
+        }
+    }
+    gCtx.stroke();
+
+    if (state.history.length > 0) {
+        const lastIndex = state.history.length - 1;
+        const lastPt = state.history[lastIndex];
+        const lastX = lastIndex * stepX;
+        let lastY = getValY(lastPt.est);
+        if (lastY < 0) lastY = 0;
+        if (lastY > h) lastY = h;
+
+        gCtx.fillStyle = '#10b981'; 
+        gCtx.beginPath();
+        gCtx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+        gCtx.fill();
+    }
+}
+</script>
+
+<script>
+function updateUI() {
+    document.getElementById('stat-total').innerText = state.totalPoints.toLocaleString();
+    document.getElementById('stat-inside').innerText = state.insidePoints.toLocaleString();
+    document.getElementById('stat-outside').innerText = (state.totalPoints - state.insidePoints).toLocaleString();
+    
+    const est = getEstimatedPi();
+    document.getElementById('stat-ratio').innerText = est.toFixed(5);
+    
+    // Decimals styling updates
+    const estStr = est.toFixed(6);
+    const splitIdx = estStr.indexOf('.');
+    if (splitIdx !== -1) {
+        document.getElementById('est-integer').innerText = estStr.substring(0, splitIdx + 1);
+        document.getElementById('est-decimals').innerText = estStr.substring(splitIdx + 1);
+    } else {
+        document.getElementById('est-integer').innerText = estStr;
+        document.getElementById('est-decimals').innerText = '';
+    }
+
+    // Accuracy and Error metrics
+    const rawDiff = est - TRUE_PI;
+    const errPct = state.totalPoints === 0 ? 100 : Math.abs((rawDiff / TRUE_PI) * 100);
+    const diffNode = document.getElementById('real-pi-difference');
+    
+    if (errPct === 0) {
+        diffNode.innerText = "Match";
+        diffNode.className = "ml-2 text-xs text-emerald-700 mono font-semibold bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded";
+    } else {
+        const sign = rawDiff > 0 ? "+" : "";
+        diffNode.innerText = `Err: ${sign}${rawDiff.toFixed(6)}`;
+        if (errPct < 0.1) {
+            diffNode.className = "ml-2 text-xs text-emerald-700 mono font-semibold bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded animate-pulse";
+        } else {
+            diffNode.className = "ml-2 text-xs text-rose-700 mono font-semibold bg-rose-50 border border-rose-100 px-1.5 py-0.5 rounded";
+        }
+    }
+
+    const accuracy = Math.max(0, 100 - errPct);
+    document.getElementById('accuracy-percentage').innerText = `${accuracy.toFixed(3)}%`;
+    document.getElementById('accuracy-progress').style.width = `${accuracy}%`;
+}
+
+function updateControlsUI() {
+    const btn = document.getElementById('btn-toggle');
+    const icon = document.getElementById('btn-toggle-icon');
+    const text = document.getElementById('btn-toggle-text');
+    const badge = document.getElementById('simulation-status-badge');
+    const pulseDot = document.getElementById('live-pulse');
+
+    if (state.isRunning) {
+        // Active Running Style (WinUI Gray secondary look when running)
+        btn.className = "btn-standard px-4 py-1.5 text-xs flex items-center gap-2";
+        icon.className = "fa-solid fa-pause text-gray-700";
+        text.innerText = "Pause Simulation";
+        
+        // Active Status Badge
+        badge.className = "text-[10px] bg-emerald-50 text-emerald-700 font-semibold px-2 py-0.5 rounded border border-emerald-100 flex items-center gap-1";
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Simulating`;
+        
+        pulseDot.className = "w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping";
+    } else {
+        // Paused Style (WinUI Accent Primary Blue)
+        btn.className = "btn-accent px-4 py-1.5 text-xs flex items-center gap-2 shadow-sm";
+        icon.className = "fa-solid fa-play";
+        text.innerText = "Start Throwing";
+        
+        // Paused Status Badge
+        badge.className = "text-[10px] bg-amber-50 text-amber-700 font-semibold px-2 py-0.5 rounded border border-amber-100 flex items-center gap-1";
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Paused`;
+        
+        pulseDot.className = "w-2.5 h-2.5 rounded-full bg-gray-400";
+    }
+}
+</script>
+
+<script>
+function toggleSimulation() {
+    state.isRunning = !state.isRunning;
+    updateControlsUI();
+}
+
+function resetSimulation() {
+    state.totalPoints = 0;
+    state.insidePoints = 0;
+    state.history = [];
+    pointHistory.length = 0;
+    state.particles = [];
+    updateUI();
+}
+
+function triggerManualDartThrow(cx = null, cy = null) {
+    let randX, randY;
+    if (cx !== null && cy !== null) {
+        randX = cx;
+        randY = cy;
+    } else {
+        randX = (Math.random() * 2) - 1;
+        randY = (Math.random() * 2) - 1;
+    }
+
+    processNewPoint(randX, randY);
+    updateUI();
+}
+
+canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.clientX - rect.left;
+    const clientY = e.clientY - rect.top;
+
+    const renderW = rect.width;
+    const center = renderW / 2;
+    const normalFactor = renderW / 2 - 4; 
+    
+    const targetX = (clientX - center) / normalFactor;
+    const targetY = -(clientY - center) / normalFactor; 
+    
+    const boundX = Math.max(-1, Math.min(1, targetX));
+    const boundY = Math.max(-1, Math.min(1, targetY));
+
+    triggerManualDartThrow(boundX, boundY);
+});
+</script>
+
+<script>
+setInterval(() => {
+    // Only throw automatically when the simulation is active
+    if (!state.isRunning) return;
+
+    // Automatically throw exactly 10 darts every 0.5 seconds (500ms)
+    for (let i = 0; i < 10; i++) {
+        const rx = (Math.random() * 2) - 1;
+        const ry = (Math.random() * 2) - 1;
+        processNewPoint(rx, ry);
+    }
+
+    updateUI();
+}, 500);
+
+function animate() {
+    drawSimulation();
+    drawConvergenceGraph();
+    requestAnimationFrame(animate);
+}
+
+window.onload = function() {
+    updateUI();
+    updateControlsUI();
+    animate();
+};
+</script>
+
+</body>
+</html>
