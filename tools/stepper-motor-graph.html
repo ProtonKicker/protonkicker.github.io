@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stepper Motor Size Graph - Tovi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+        }
+        .bento-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 28px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        .card-label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #86868b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+        
+        /* Custom metallic gradient for the motors */
+        .motor-face {
+            background: linear-gradient(135deg, #475569 0%, #334155 100%);
+            box-shadow: 
+                inset 0 0 10px rgba(0,0,0,0.5),
+                inset 1px 1px 2px rgba(255,255,255,0.2),
+                2px 4px 6px rgba(0,0,0,0.1);
+        }
+        .motor-bearing {
+            background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+            box-shadow: 
+                inset 0 2px 4px rgba(0,0,0,0.3),
+                0 1px 2px rgba(255,255,255,0.2);
+        }
+        .motor-shaft {
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+        .mounting-hole {
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: #f5f5f7;
+            border-radius: 100px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            color: #1d1d1f;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+        .back-link:hover {
+            background: #e8e8ed;
+        }
+        .back-link svg {
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+    
+    <main class="max-w-4xl mx-auto">
+        
+        <!-- Back Link -->
+        <a href="../index.html" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Dashboard
+        </a>
+        
+        <!-- Stepper Motor Comparison Card -->
+        <div class="bento-card">
+            <div class="card-label">Stepper Motor Standards</div>
+            <div class="mt-4">
+                <div id="motor-container" class="flex flex-wrap items-end justify-center gap-4 min-h-[200px]"></div>
+                
+                <div class="mt-6 overflow-x-auto">
+                    <table class="w-full text-left border-collapse bg-gray-50 rounded-lg overflow-hidden">
+                        <thead>
+                            <tr class="bg-slate-200 text-slate-700">
+                                <th class="p-2 text-sm font-semibold border-b">NEMA Standard</th>
+                                <th class="p-2 text-sm font-semibold border-b">Imperial Size</th>
+                                <th class="p-2 text-sm font-semibold border-b">Metric Size</th>
+                                <th class="p-2 text-sm font-semibold border-b">Metric Name</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-slate-600 divide-y divide-gray-100 text-sm">
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-2 font-medium text-blue-600">NEMA 11</td>
+                                <td class="p-2">1.1 inch</td>
+                                <td class="p-2">28 mm</td>
+                                <td class="p-2 font-medium text-blue-600">28 Motor</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-2 font-medium text-blue-600">NEMA 14</td>
+                                <td class="p-2">1.4 inch</td>
+                                <td class="p-2">35 mm</td>
+                                <td class="p-2 font-medium text-blue-600">35 Motor</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-2 font-medium text-blue-600">NEMA 17</td>
+                                <td class="p-2">1.7 inch</td>
+                                <td class="p-2">42 mm</td>
+                                <td class="p-2 font-medium text-blue-600">42 Motor</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-2 font-medium text-blue-600">NEMA 23</td>
+                                <td class="p-2">2.3 inch</td>
+                                <td class="p-2">57 mm</td>
+                                <td class="p-2 font-medium text-blue-600">57 Motor</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-2 font-medium text-blue-600">NEMA 34</td>
+                                <td class="p-2">3.4 inch</td>
+                                <td class="p-2">86 mm</td>
+                                <td class="p-2 font-medium text-blue-600">86 Motor</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Data for the motors. 'size' is the actual size in mm.
+        const motors = [
+            { nema: 'NEMA 11', metric: '28 Motor', size: 28, highlighted: false },
+            { nema: 'NEMA 14', metric: '35 Motor', size: 35, highlighted: false },
+            { nema: 'NEMA 17', metric: '42 Motor', size: 42, highlighted: false },
+            { nema: 'NEMA 23', metric: '57 Motor', size: 57, highlighted: false },
+            { nema: 'NEMA 34', metric: '86 Motor', size: 86, highlighted: false }
+        ];
+
+        const container = document.getElementById('motor-container');
+        
+        // Visual scale multiplier (pixels per mm). 
+        // 2.2 keeps NEMA 34 reasonable on screen while showing differences clearly.
+        const pxPerMm = 1.8; 
+
+        motors.forEach(motor => {
+            const pxSize = motor.size * pxPerMm;
+            
+            // Build the card container
+            const card = document.createElement('div');
+            card.className = `flex flex-col items-center group transition-transform hover:-translate-y-2`;
+            
+            // Highlight classes if it's the NEMA 17
+            const textBgClass = motor.highlighted ? 'bg-blue-100 border-blue-300' : 'bg-gray-100 border-gray-200';
+            const nameClass = motor.highlighted ? 'text-blue-700 font-bold' : 'text-slate-700 font-semibold';
+            const metricClass = motor.highlighted ? 'text-blue-600 font-bold' : 'text-slate-500 font-medium';
+
+            // HTML for the proportional motor block
+            card.innerHTML = `
+                <div class="mb-3 text-center border px-2 py-1 rounded-lg shadow-sm ${textBgClass}">
+                    <div class="${nameClass} text-sm">${motor.nema}</div>
+                    <div class="text-xs ${metricClass}">${motor.metric}</div>
+                </div>
+                
+                <div class="relative motor-face rounded-xl border border-slate-600 flex items-center justify-center transition-all duration-300 group-hover:shadow-2xl" 
+                     style="width: ${pxSize}px; height: ${pxSize}px;">
+                     
+                    <!-- Central Bearing -->
+                    <div class="absolute rounded-full motor-bearing flex items-center justify-center border border-slate-500"
+                         style="width: 40%; height: 40%;">
+                         <!-- Shaft -->
+                         <div class="rounded-full motor-shaft" style="width: 30%; height: 30%;"></div>
+                    </div>
+
+                    <!-- Mounting Holes -->
+                    <div class="absolute bg-slate-900 rounded-full mounting-hole" style="width: 8%; height: 8%; top: 8%; left: 8%;"></div>
+                    <div class="absolute bg-slate-900 rounded-full mounting-hole" style="width: 8%; height: 8%; top: 8%; right: 8%;"></div>
+                    <div class="absolute bg-slate-900 rounded-full mounting-hole" style="width: 8%; height: 8%; bottom: 8%; left: 8%;"></div>
+                    <div class="absolute bg-slate-900 rounded-full mounting-hole" style="width: 8%; height: 8%; bottom: 8%; right: 8%;"></div>
+                </div>
+            `;
+            
+            container.appendChild(card);
+        });
+    </script>
+
+</body>
+</html>
