@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="pFill" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF9A4B"/>
+      <stop offset="1" stop-color="#E85017"/>
+    </linearGradient>
+    <linearGradient id="pSide" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#E85017"/>
+      <stop offset="1" stop-color="#B93708"/>
+    </linearGradient>
+    <linearGradient id="pTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFC089"/>
+      <stop offset="1" stop-color="#FF8A3D"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ======= Clean isometric 3D P letter — proper geometry with uniform extrusion =======
+
+       FRONT silhouette (z=0) uses simple rounded rects;
+       BACK silhouette (z=1) is the exact same shape translated by (+16, -10) = isometric up-right.
+       All side faces are drawn as 4-vertex polygons connecting a front edge to its matching back edge,
+       so there is zero alignment drift between faces.
+  -->
+
+  <!-- -------- Extrusion / depth faces (draw first so front face overlaps them) -------- -->
+
+  <!-- Stem — top face (connects top of front stem to top of back stem) -->
+  <polygon points="22,18 48,18 64,8   38,8"   fill="url(#pTop)"/>
+  <!-- Stem — left side face (left edge front -> left edge back) -->
+  <polygon points="22,18 38,8  38,112 22,122" fill="url(#pSide)"/>
+  <!-- Stem — bottom face (underside of stem tail) -->
+  <polygon points="22,122 38,112 64,112 48,122" fill="url(#pSide)"/>
+  <!-- Stem — right side face (stem right edge below bowl) -->
+  <polygon points="48,76 64,66 64,112 48,122" fill="url(#pSide)"/>
+
+  <!-- Bowl — top face (bowl top front -> bowl top back) -->
+  <polygon points="48,18 92,18 108,8  64,8"  fill="url(#pTop)"/>
+  <!-- Bowl — right side face (bowl right front -> bowl right back) -->
+  <polygon points="92,18 108,8 108,64 92,74"  fill="url(#pSide)"/>
+  <!-- Bowl — bottom face (underside of bowl) -->
+  <polygon points="48,74 64,66 108,66 92,74" fill="url(#pSide)"/>
+  <!-- Bowl — inner hole top depth (slight sliver so hole reads as 3D punch-through) -->
+  <polygon points="62,36 78,26 102,26 86,36" fill="url(#pTop)" opacity="0.7"/>
+
+  <!-- -------- FRONT FACE of the P (main silhouette, on top of all depth faces) -------- -->
+  <g fill="url(#pFill)">
+    <!-- Vertical stem — full height rounded column -->
+    <rect x="22" y="18" width="26" height="104" rx="8"/>
+    <!-- Bowl — attached to stem right, spans roughly top 2/3 of stem height -->
+    <rect x="48" y="18" width="44" height="56" rx="18"/>
+    <!-- Bowl inner hole — the cutout of the P.
+         Uses the same cream/warm off-white as the page background so it reads as empty space. -->
+    <rect x="62" y="36" width="22" height="22" rx="11" fill="#FBF7F2"/>
+  </g>
+</svg>

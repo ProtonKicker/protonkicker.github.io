@@ -3,289 +3,766 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tovi - Dashboard</title>
+    <title>Tovi</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #F7F5F1;
+            --bg-warm: #F3EFE8;
+            --card: rgba(255, 255, 255, 0.72);
+            --card-solid: #FFFFFF;
+            --text-primary: #1C1B1F;
+            --text-secondary: #6B6966;
+            --text-tertiary: #9B9994;
+            --accent: #5B7FFF;
+            --accent-soft: rgba(91, 127, 255, 0.12);
+            --shadow-soft: 0 2px 8px rgba(20, 20, 30, 0.04),
+                           0 8px 28px rgba(20, 20, 30, 0.06);
+            --shadow-hover: 0 4px 16px rgba(20, 20, 30, 0.07),
+                            0 16px 48px rgba(20, 20, 30, 0.10);
+            --shadow-icon: 0 6px 18px rgba(20, 20, 30, 0.16),
+                           0 2px 4px rgba(20, 20, 30, 0.08),
+                           inset 0 1px 0 rgba(255, 255, 255, 0.22);
+            --radius-xl: 28px;
+            --radius-lg: 22px;
+            --radius-md: 16px;
+            --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #111113;
+                --bg-warm: #161519;
+                --card: rgba(28, 27, 31, 0.65);
+                --card-solid: #1E1D22;
+                --text-primary: #F2F1EE;
+                --text-secondary: #A8A6A1;
+                --text-tertiary: #6E6C68;
+                --accent: #8DA3FF;
+                --accent-soft: rgba(141, 163, 255, 0.14);
+                --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.30),
+                               0 8px 28px rgba(0, 0, 0, 0.35);
+                --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.40),
+                                0 16px 48px rgba(0, 0, 0, 0.50);
+                --shadow-icon: 0 8px 22px rgba(0, 0, 0, 0.50),
+                               0 2px 6px rgba(0, 0, 0, 0.30),
+                               inset 0 1px 0 rgba(255, 255, 255, 0.10);
+            }
+        }
+
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-            background-color: #f5f5f7;
-            color: #1d1d1f;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
+
+        .bg-aurora {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.55;
+            mix-blend-mode: multiply;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .blob {
+                mix-blend-mode: screen;
+                opacity: 0.35;
+            }
+        }
+
+        .blob-1 {
+            width: 520px;
+            height: 520px;
+            background: radial-gradient(circle at 30% 30%, #E8DFFB, transparent 60%);
+            top: -160px;
+            left: -120px;
+            animation: drift-1 22s var(--ease-spring) infinite alternate;
+        }
+
+        .blob-2 {
+            width: 460px;
+            height: 460px;
+            background: radial-gradient(circle at 70% 40%, #FBE7D5, transparent 60%);
+            bottom: -140px;
+            right: -80px;
+            animation: drift-2 26s var(--ease-spring) infinite alternate;
+        }
+
+        .blob-3 {
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle at 50% 50%, #DBE8FF, transparent 60%);
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.35;
+            animation: drift-3 30s var(--ease-spring) infinite alternate;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .blob-1 { background: radial-gradient(circle at 30% 30%, #433868, transparent 60%); }
+            .blob-2 { background: radial-gradient(circle at 70% 40%, #5A3E2C, transparent 60%); }
+            .blob-3 { background: radial-gradient(circle at 50% 50%, #2E3A63, transparent 60%); opacity: 0.25; }
+        }
+
+        @keyframes drift-1 {
+            0%   { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(40px, 30px) scale(1.08); }
+        }
+        @keyframes drift-2 {
+            0%   { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-35px, -25px) scale(1.06); }
+        }
+        @keyframes drift-3 {
+            0%   { transform: translate(-50%, -50%) scale(1); }
+            100% { transform: translate(-46%, -54%) scale(1.1); }
+        }
+
         .bento-card {
-            background: #ffffff;
-            border-radius: 24px;
-            padding: 28px;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            background: var(--card);
+            backdrop-filter: blur(18px) saturate(1.2);
+            -webkit-backdrop-filter: blur(18px) saturate(1.2);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition:
+                transform 400ms var(--ease-spring),
+                box-shadow 400ms var(--ease-spring),
+                background 300ms var(--ease-spring);
+            overflow: hidden;
+            position: relative;
         }
-        .bento-card:hover {
-            transform: scale(1.01);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+
+        @media (prefers-color-scheme: dark) {
+            .bento-card {
+                border-color: rgba(255, 255, 255, 0.06);
+            }
         }
-        .card-label {
-            font-size: 0.8125rem;
-            font-weight: 600;
-            color: #86868b;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 8px;
+
+        .bento-card.interactive:hover {
+            transform: translateY(-2px) scale(1.015);
+            box-shadow: var(--shadow-hover);
         }
-        .card-title-large {
-            font-size: 3rem;
-            font-weight: 800;
-            line-height: 1;
+
+        .bento-card.interactive:active {
+            transform: translateY(0) scale(0.995);
         }
-        .card-subtitle {
-            font-size: 0.9375rem;
-            color: #86868b;
-            margin-top: 6px;
-        }
-        .project-list-item {
+
+        .card-inner {
+            padding: 20px;
+            height: 100%;
             display: flex;
+            flex-direction: column;
+        }
+
+        .eyebrow {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+
+        .hero-name {
+            font-size: clamp(5rem, 14vw, 11rem);
+            font-weight: 800;
+            line-height: 0.88;
+            letter-spacing: -0.05em;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        .hero-last {
+            color: #A89AC0;
+        }
+
+        /* ============ Dock-style social icons — separate card ============ */
+
+        .dock-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 12px;
+            justify-items: center;
+            align-content: center;
+            flex-grow: 1;
+            padding: 4px 2px 2px;
+        }
+
+        .dock-btn {
+            display: inline-flex;
             align-items: center;
-            gap: 14px;
-            padding: 14px;
-            border-radius: 16px;
-            transition: all 0.2s ease;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 15px;
+            color: white;
             text-decoration: none;
-            color: inherit;
+            box-shadow: var(--shadow-icon);
+            transition:
+                transform 380ms var(--ease-spring),
+                box-shadow 380ms var(--ease-spring);
+            position: relative;
+            overflow: hidden;
+            background: #fff;
         }
-        .project-list-item:hover {
-            background: #f5f5f7;
+
+        .dock-btn img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+            position: relative;
+            z-index: 1;
         }
-        .project-mini-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
+
+        .dock-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0) 55%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .dock-btn svg {
+            width: 24px;
+            height: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dock-btn:hover {
+            transform: translateY(-6px) scale(1.12);
+            box-shadow:
+                0 14px 32px rgba(20, 20, 30, 0.28),
+                0 4px 8px rgba(20, 20, 30, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        }
+
+        .dock-btn:active {
+            transform: translateY(-1px) scale(1.06);
+        }
+
+        .dock-gh { background: linear-gradient(145deg, #2A2A2E 0%, #111113 100%); }
+        .dock-ig { background: linear-gradient(145deg, #F7B731 0%, #E1306C 45%, #833AB4 100%); }
+        .dock-x  { background: linear-gradient(145deg, #1A1A1A 0%, #000000 100%); }
+        .dock-li { background: linear-gradient(145deg, #2C7CB7 0%, #0A66C2 100%); }
+        .dock-pr { background: #fff; }
+        .dock-cc { background: #fff; }
+        .dock-hs { background: #fff; }
+        .dock-pg { background: #fff; }
+
+        @media (prefers-color-scheme: dark) {
+            .dock-x  { background: linear-gradient(145deg, #FFFFFF 0%, #E8E8EC 100%); color: #111; }
+            .dock-gh { background: linear-gradient(145deg, #F0EFEB 0%, #D8D7D2 100%); color: #111; }
+        }
+
+        /* ============ Project cards ============ */
+
+        .project-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .project-media {
+            position: relative;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            aspect-ratio: 16 / 7;
+            background: var(--bg-warm);
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+
+        .project-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 600ms var(--ease-spring);
+        }
+
+        .bento-card.interactive:hover .project-media img {
+            transform: scale(1.04);
+        }
+
+        .project-media::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,0.12) 100%);
+            pointer-events: none;
+        }
+
+        .project-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            margin: 0 0 1px 0;
+        }
+
+        .project-desc {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .project-arrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .span-2048 .card-inner,
+        .span-lime .card-inner {
+            padding: 14px;
+        }
+
+        .project-arrow svg {
+            width: 14px;
+            height: 14px;
+            transition: transform 300ms var(--ease-spring);
+        }
+
+        .bento-card.interactive:hover .project-arrow svg {
+            transform: translate(3px, -3px);
+        }
+
+        /* ============ Info cards (Berkeley, CalSol) ============ */
+
+        .info-row {
+            display: flex;
+            gap: 11px;
+            align-items: center;
+            height: 100%;
+        }
+
+        .info-icon-wrap {
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            box-shadow: 0 6px 14px rgba(20, 20, 30, 0.10),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+            position: relative;
+            overflow: hidden;
         }
-        .project-mini-icon svg {
-            width: 22px;
-            height: 22px;
+
+        .info-icon-wrap::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0) 60%);
+            pointer-events: none;
         }
-        .project-name {
-            font-size: 0.9375rem;
+
+        .info-icon-wrap svg {
+            width: 19px;
+            height: 19px;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        .grad-berkeley { background: linear-gradient(145deg, #FDB827 0%, #003262 100%); }
+        .grad-calsol   { background: linear-gradient(145deg, #FFD23F 0%, #C41E3A 100%); }
+
+        .info-content {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .info-label {
+            font-size: 0.66rem;
             font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 3px;
         }
-        .project-desc {
-            font-size: 0.8125rem;
-            color: #86868b;
+
+        .info-title {
+            font-size: 0.98rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            margin: 0 0 2px 0;
+            line-height: 1.25;
         }
-        .social-link {
+
+        .info-sub {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            line-height: 1.35;
+            margin: 0;
+        }
+
+        .info-link {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 18px;
-            background: #f5f5f7;
-            border-radius: 100px;
-            font-size: 0.8125rem;
+            gap: 4px;
+            margin-top: 5px;
+            font-size: 0.74rem;
             font-weight: 600;
-            transition: all 0.2s ease;
-            color: #1d1d1f;
+            color: var(--accent);
             text-decoration: none;
         }
-        .social-link:hover {
-            background: #e8e8ed;
+
+        .span-berkeley .card-inner,
+        .span-calsol .card-inner {
+            padding: 14px;
         }
-        .social-link svg {
-            width: 16px;
-            height: 16px;
+
+        .info-link svg {
+            width: 13px;
+            height: 13px;
+            transition: transform 300ms var(--ease-spring);
         }
-        .gradient-blue { background: linear-gradient(135deg, #007aff, #5856d6); }
-        .gradient-pink { background: linear-gradient(135deg, #ff2d55, #ff6b8a); }
-        .gradient-orange { background: linear-gradient(135deg, #ff9500, #ff6b00); }
-        .gradient-purple { background: linear-gradient(135deg, #af52de, #8944ab); }
-        .gradient-green { background: linear-gradient(135deg, #34c759, #30b350); }
-        .gradient-cyan { background: linear-gradient(135deg, #5ac8fa, #007aff); }
-        .gradient-indigo { background: linear-gradient(135deg, #5856d6, #af52de); }
-        
-        /* Custom metallic gradient for the motors */
-        .motor-face {
-            background: linear-gradient(135deg, #475569 0%, #334155 100%);
-            box-shadow: 
-                inset 0 0 10px rgba(0,0,0,0.5),
-                inset 1px 1px 2px rgba(255,255,255,0.2),
-                2px 4px 6px rgba(0,0,0,0.1);
+
+        .bento-card.interactive:hover .info-link svg {
+            transform: translate(3px, -3px);
         }
-        .motor-bearing {
-            background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
-            box-shadow: 
-                inset 0 2px 4px rgba(0,0,0,0.3),
-                0 1px 2px rgba(255,255,255,0.2);
+
+        /* ============ Grid layout ============ */
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-auto-rows: minmax(60px, auto);
+            gap: 18px;
+            width: 100%;
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 28px;
+            box-sizing: border-box;
+            align-content: start;
         }
-        .motor-shaft {
-            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-        }
-        .mounting-hole {
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
-        }
-        
-        @media (max-width: 768px) {
-            .bottom-row {
-                flex-direction: column;
+
+        .span-dock      { grid-column: 1 / span 8;  grid-row: 1 / span 1; }
+        .span-2048      { grid-column: 9 / span 4;  grid-row: 1 / span 3; }
+        .span-hero      { grid-column: 1 / span 8;  grid-row: 2 / span 4; }
+        .span-lime      { grid-column: 9 / span 4;  grid-row: 4 / span 3; }
+        .span-berkeley  { grid-column: 1 / span 4;  grid-row: 6 / span 2; }
+        .span-calsol    { grid-column: 5 / span 4;  grid-row: 6 / span 2; }
+
+        @media (max-width: 1024px) {
+            .bento-grid {
+                grid-template-columns: repeat(8, 1fr);
+                grid-template-rows: none;
+                grid-auto-rows: minmax(80px, auto);
+                height: auto;
+                padding: 20px;
+                gap: 16px;
             }
+            .span-dock,
+            .span-hero,
+            .span-2048,
+            .span-berkeley,
+            .span-calsol,
+            .span-lime {
+                grid-row: auto;
+            }
+            .span-dock     { grid-column: 1 / -1; }
+            .span-hero     { grid-column: 1 / -1; }
+            .span-2048     { grid-column: 1 / span 4; }
+            .span-lime     { grid-column: 5 / span 4; }
+            .span-berkeley { grid-column: 1 / span 4; }
+            .span-calsol   { grid-column: 5 / span 4; }
+        }
+
+        @media (max-width: 720px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+                padding: 16px;
+                gap: 14px;
+                max-width: 520px;
+            }
+            .span-hero,
+            .span-dock,
+            .span-2048,
+            .span-berkeley,
+            .span-calsol,
+            .span-lime {
+                grid-column: 1 / -1;
+                grid-row: auto;
+            }
+            .card-inner { padding: 22px; }
+            .hero-name { font-size: 5rem; }
+            .dock-grid { grid-template-columns: repeat(4, 1fr); }
+            .dock-btn  { width: 52px; height: 52px; }
+            .dock-btn svg, .dock-btn img:not([src*=".svg"]) { width: 22px; height: 22px; }
+        }
+
+        .page-wrap {
+            min-height: 100vh;
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+        }
+
+        @media (max-width: 1024px) {
+            .page-wrap {
+                display: block;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .blob { animation: none; }
+        }
+
+        @keyframes card-in {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.985);
+                filter: blur(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        .bento-card {
+            animation: card-in 700ms var(--ease-spring) both;
+        }
+        .span-dock     { animation-delay: 60ms; }
+        .span-hero     { animation-delay: 120ms; }
+        .span-2048     { animation-delay: 180ms; }
+        .span-lime     { animation-delay: 240ms; }
+        .span-berkeley { animation-delay: 300ms; }
+        .span-calsol   { animation-delay: 360ms; }
+
+        .cursor-glow {
+            position: fixed;
+            width: 340px;
+            height: 340px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(91, 127, 255, 0.11) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: 0;
+            transform: translate(-50%, -50%);
+            transition: opacity 400ms var(--ease-spring);
+            opacity: 0;
+            mix-blend-mode: multiply;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .cursor-glow {
+                background: radial-gradient(circle, rgba(141, 163, 255, 0.13) 0%, transparent 65%);
+                mix-blend-mode: screen;
+            }
+        }
+
+        @media (hover: none) {
+            .cursor-glow { display: none; }
         }
     </style>
 </head>
-<body class="min-h-screen p-6">
-    
-    <main class="max-w-4xl mx-auto space-y-4">
-        
-        <!-- Welcome Card (top, full width) -->
-        <div class="bento-card">
-            <div class="card-label">Welcome</div>
-            <div class="card-title-large mt-2">Hi, I'm <span class="text-[#007aff]">Tovi</span></div>
-            <div class="card-subtitle mt-3">ProtonKicker / TuuVee</div>
-            <div class="mt-8 flex flex-wrap gap-3">
-                <a href="https://github.com/ProtonKicker" target="_blank" class="social-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                    GitHub
-                </a>
-                <a href="https://www.printables.com/@Tovi" target="_blank" class="social-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.678 4.8 12 9.6v9.6l8.322-4.8V4.8L12 0ZM12 19.2l-8.322-4.8V24Z"/></svg>
-                    Printables
-                </a>
-                <a href="https://x.com/ToviDing" target="_blank" class="social-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    X
-                </a>
-                <a href="https://www.linkedin.com/in/toviding/" target="_blank" class="social-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                    LinkedIn
-                </a>
-                <a href="https://www.crealitycloud.cn/user/1709332660" target="_blank" class="social-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7,2H17V8H19V13H16.5L13,17H11L7.5,13H5V8H7V2M10,22H2V20H10A1,1 0 0,0 11,19V18H13V19A3,3 0 0,1 10,22Z"/></svg>
-                    Creality Cloud
-                </a>
-                <a href="https://www.instagram.com/" target="_blank" class="social-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                    Instagram
-                </a>
-                <a href="https://app.joinhandshake.com/profiles/amt833" target="_blank" class="social-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                    Handshake
-                </a>
-                <a href="https://www.primegrid.com/show_user.php?userid=1989865" target="_blank" class="social-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                    PrimeGrid
-                </a>
-            </div>
-        </div>
+<body>
 
-        <!-- Bottom Row: Tools + Games side by side -->
-        <div class="bottom-row flex gap-4">
-            
-            <!-- Tools Card -->
-            <div class="bento-card flex-1">
-                <div class="card-label">Tools</div>
-                <div class="mt-4 space-y-1">
-                    <a href="https://knowledge-test-practicer.pages.dev/" target="_blank" class="project-list-item">
-                        <div class="project-mini-icon gradient-purple">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-                        </div>
-                        <div>
-                            <div class="project-name">CA DMV Knowledge Test Practicer</div>
-                            <div class="project-desc">Interactive knowledge testing platform</div>
-                        </div>
-                    </a>
-                    <a href="tools/monte-carlo-pi.html" class="project-list-item">
-                        <div class="project-mini-icon gradient-blue">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v20"/><path d="M2 12h20"/></svg>
-                        </div>
-                        <div>
-                            <div class="project-name">Monte Carlo Pi Estimator</div>
-                            <div class="project-desc">Random sampling approximation</div>
-                        </div>
-                    </a>
-                    <a href="tools/keyboard-layout.html" class="project-list-item">
-                        <div class="project-mini-icon gradient-green">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
-                        </div>
-                        <div>
-                            <div class="project-name">Wubi Keyboard Layout</div>
-                            <div class="project-desc">Chinese input method demo</div>
-                        </div>
-                    </a>
-                    <a href="tools/complete-graph-visualizer.html" class="project-list-item">
-                        <div class="project-mini-icon gradient-cyan">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M5 6l7 12"/><path d="M19 6l-7 12"/><path d="M5 6h14"/></svg>
-                        </div>
-                        <div>
-                            <div class="project-name">Complete Graph</div>
-                            <div class="project-desc">Graph theory visualizer</div>
-                        </div>
-                    </a>
-                    <a href="tools/pie-visualizer.html" class="project-list-item">
-                        <div class="project-mini-icon gradient-indigo">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-                        </div>
-                        <div>
-                            <div class="project-name">Inclusion-Exclusion Visualizer</div>
-                            <div class="project-desc">Data visualization tool</div>
-                        </div>
-                    </a>
-                    <a href="tools/stepper-motor-graph.html" class="project-list-item">
-                        <div class="project-mini-icon gradient-orange">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                        </div>
-                        <div>
-                            <div class="project-name">Stepper Motor Size Graph</div>
-                            <div class="project-desc">NEMA standard comparison</div>
-                        </div>
-                    </a>
+    <div class="bg-aurora" aria-hidden="true">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+    <div class="page-wrap">
+        <main class="bento-grid">
+
+            <!-- SOCIAL DOCK CARD (macOS Dock-style colored app icons) — ON TOP -->
+            <article class="bento-card span-dock" aria-label="Social links">
+                <div class="card-inner">
+                    <div class="dock-grid">
+                        <a class="dock-btn dock-gh" href="https://github.com/ProtonKicker" target="_blank" rel="noopener" aria-label="GitHub">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.08-.73.08-.73 1.21.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5.99.11-.78.42-1.31.76-1.61-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.11-3.17 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.29-1.23 3.29-1.23.66 1.65.25 2.87.12 3.17.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.83.58A12.01 12.01 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                        </a>
+                        <a class="dock-btn dock-ig" href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 1-2.881.001 1.44 1.44 0 0 1 2.881-.001z"/></svg>
+                        </a>
+                        <a class="dock-btn dock-x" href="https://x.com/ToviDing" target="_blank" rel="noopener" aria-label="X / Twitter">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a class="dock-btn dock-li" href="https://www.linkedin.com/in/toviding/" target="_blank" rel="noopener" aria-label="LinkedIn">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        </a>
+                        <a class="dock-btn dock-pr" href="https://www.printables.com/@Tovi" target="_blank" rel="noopener" aria-label="Printables">
+                            <img src="assets/printables-icon-real.png" alt="Printables logo" draggable="false">
+                        </a>
+                        <a class="dock-btn dock-cc" href="https://www.crealitycloud.cn/user/1709332660" target="_blank" rel="noopener" aria-label="Creality Cloud">
+                            <img src="assets/crealitycloud-icon-real.png" alt="Creality Cloud logo" draggable="false">
+                        </a>
+                        <a class="dock-btn dock-hs" href="https://app.joinhandshake.com/profiles/amt833" target="_blank" rel="noopener" aria-label="Handshake">
+                            <img src="assets/handshake-icon-real.png" alt="Handshake logo" draggable="false">
+                        </a>
+                        <a class="dock-btn dock-pg" href="https://www.primegrid.com/show_user.php?userid=1989865" target="_blank" rel="noopener" aria-label="PrimeGrid">
+                            <img src="assets/primegrid-icon-real.png" alt="PrimeGrid logo" draggable="false">
+                        </a>
+                    </div>
                 </div>
-            </div>
+            </article>
 
-            <!-- Games Card -->
-            <div class="bento-card flex-1">
-                <div class="card-label">Games</div>
-                <div class="mt-4 space-y-1">
-                    <a href="games/sheep.html" class="project-list-item">
-                        <div class="project-mini-icon gradient-blue">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                        </div>
-                        <div>
-                            <div class="project-name">Sheep Counter</div>
-                            <div class="project-desc">A simple counting game</div>
-                        </div>
-                    </a>
-                    <a href="games/colors.html" class="project-list-item">
-                        <div class="project-mini-icon gradient-pink">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-                        </div>
-                        <div>
-                            <div class="project-name">Entropic Colors</div>
-                            <div class="project-desc">Color exploration tool</div>
-                        </div>
-                    </a>
-                    <a href="games/solarsystem.html" class="project-list-item">
-                        <div class="project-mini-icon gradient-orange">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="4"/></svg>
-                        </div>
-                        <div>
-                            <div class="project-name">Solar System</div>
-                            <div class="project-desc">Interactive visualization</div>
-                        </div>
-                    </a>
-                    <a href="games/2048.html" class="project-list-item">
-                        <div class="project-mini-icon gradient-purple">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>
-                        </div>
-                        <div>
-                            <div class="project-name">2048</div>
-                            <div class="project-desc">Classic puzzle game</div>
-                        </div>
-                    </a>
+            <!-- HERO / NAME CARD (largest) -->
+            <article class="bento-card span-hero">
+                <div class="card-inner" style="justify-content: center; align-items: center; text-align: center;">
+                    <h1 class="hero-name">Tovi <span class="hero-last">Ding</span></h1>
                 </div>
-            </div>
+            </article>
 
-        </div>
+            <!-- UC BERKELEY CARD -->
+            <article class="bento-card span-berkeley" aria-label="UC Berkeley">
+                <div class="card-inner">
+                    <div class="info-row">
+                        <div class="info-icon-wrap grad-berkeley" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                        </div>
+                        <div class="info-content">
+                            <p class="info-label">Student</p>
+                            <h4 class="info-title">UC Berkeley</h4>
+                            <p class="info-sub">Applied Mathematics &nbsp;·&nbsp; Fluid Mechanics</p>
+                        </div>
+                    </div>
+                </div>
+            </article>
 
-    </main>
+            <!-- CALSOL CARD (interactive — links to calsol.berkeley.edu) -->
+            <a class="bento-card interactive span-calsol" href="https://calsol.berkeley.edu/" target="_blank" rel="noopener" aria-label="CalSol Solar Car Team">
+                <div class="card-inner">
+                    <div class="info-row">
+                        <div class="info-icon-wrap grad-calsol" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/><path d="M5 17l1.5-1.5M19 17l-1.5-1.5"/></svg>
+                        </div>
+                        <div class="info-content">
+                            <p class="info-label">Team Member</p>
+                            <h4 class="info-title">CalSol</h4>
+                            <p class="info-sub">Berkeley Solar Car Program &nbsp;·&nbsp; Dynamics </p>
+                            <span class="info-link">
+                                Visit team site
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 2048 GAME CARD -->
+            <a class="bento-card interactive span-2048" href="games/2048.html" aria-label="Play 2048">
+                <div class="card-inner project-card">
+                    <div class="project-media" aria-hidden="true">
+                        <img src="assets/2048-preview.png" alt="2048 game preview">
+                    </div>
+                    <p class="eyebrow">Game</p>
+                    <h3 class="project-title">Pixelated 2048</h3>
+                    <p class="project-desc">2048 with a twist! Porduct of my addiction to vibe coding.</p>
+                    <span class="project-arrow">
+                        Play
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg>
+                    </span>
+                </div>
+            </a>
+
+            <!-- LIME EXTRUDER CARD (same size/layout as 2048) -->
+            <a class="bento-card interactive span-lime" href="https://github.com/ProtonKicker/Lime" target="_blank" rel="noopener" aria-label="Lime Extruder project">
+                <div class="card-inner project-card">
+                    <div class="project-media" aria-hidden="true">
+                        <img src="assets/lime-extruder.jpg" alt="Lime extruder mounted on a 3D printer" loading="lazy">
+                    </div>
+                    <p class="eyebrow">Hardware</p>
+                    <h3 class="project-title">Lime Extruder</h3>
+                    <p class="project-desc">Custom 3D printer extruder I designed &amp; built during my internship at Phaetus.</p>
+                    <span class="project-arrow">
+                        View on GitHub
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg>
+                    </span>
+                </div>
+            </a>
+
+        </main>
+    </div>
+
+    <script>
+        (function () {
+            var glow = document.getElementById('cursorGlow');
+            if (!glow || matchMedia('(hover: none)').matches) return;
+
+            var rafId = null;
+            var tx = 0, ty = 0, cx = 0, cy = 0;
+
+            window.addEventListener('pointermove', function (e) {
+                tx = e.clientX;
+                ty = e.clientY;
+                if (!rafId) rafId = requestAnimationFrame(tick);
+            }, { passive: true });
+
+            function tick() {
+                cx += (tx - cx) * 0.15;
+                cy += (ty - cy) * 0.15;
+                glow.style.left = cx + 'px';
+                glow.style.top = cy + 'px';
+                if (Math.abs(tx - cx) > 0.4 || Math.abs(ty - cy) > 0.4) {
+                    rafId = requestAnimationFrame(tick);
+                } else {
+                    rafId = null;
+                }
+            }
+
+            document.addEventListener('pointerenter', function (e) {
+                if (e.target.closest('.bento-card, .dock-btn')) {
+                    glow.style.opacity = '1';
+                }
+            }, true);
+
+            document.addEventListener('pointerleave', function (e) {
+                if (e.target.closest('.bento-card, .dock-btn')) {
+                    glow.style.opacity = '0';
+                }
+            }, true);
+        })();
+    </script>
 
 </body>
 </html>
