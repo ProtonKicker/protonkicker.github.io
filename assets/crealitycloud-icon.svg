@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="ct" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6EE39A"/><stop offset="1" stop-color="#2CB864"/></linearGradient>
+    <linearGradient id="cl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2CB864"/><stop offset="1" stop-color="#0C8A43"/></linearGradient>
+    <linearGradient id="cr" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#18A554"/><stop offset="1" stop-color="#077035"/></linearGradient>
+  </defs>
+
+  <!-- ===== Two adjacent isometric cubes forming M silhouette from above =====
+       Left cube:  top (6,56)-(31,40)-(56,56)-(31,72)
+                   left face (6,56)-(31,72)-(31,110)-(6,94)
+                   right face (56,56)-(31,72)-(31,110)-(56,94)
+       Right cube: top (58,56)-(83,40)-(108,56)-(83,72)
+                   left face (58,56)-(83,72)-(83,110)-(58,94)
+                   right face (108,56)-(83,72)-(83,110)-(108,94)  -->
+
+  <!-- RIGHT CUBE DRAW FIRST (further back visually? no — draw left then right so right overlaps correctly for the crevice) -->
+  <!-- Actually draw front-facing faces last so they overlap the valley seam cleanly. -->
+
+  <!-- BACK FACES (shared valley is drawn once via both) -->
+
+  <!-- LEFT CUBE -->
+  <polygon points="6,56 31,40 56,56 31,72" fill="url(#ct)"/>       <!-- top -->
+  <polygon points="6,56 31,72 31,110 6,94" fill="url(#cl)"/>      <!-- front-left -->
+  <polygon points="56,56 31,72 31,110 56,94" fill="url(#cr)"/>    <!-- front-right (valley side) -->
+
+  <!-- RIGHT CUBE -->
+  <polygon points="58,56 83,40 108,56 83,72" fill="url(#ct)"/>    <!-- top -->
+  <polygon points="58,56 83,72 83,110 58,94" fill="url(#cl)"/>    <!-- front-left (valley side) -->
+  <polygon points="108,56 83,72 83,110 108,94" fill="url(#cr)"/>  <!-- front-right -->
+</svg>
