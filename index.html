@@ -348,7 +348,8 @@
         }
 
         .span-2048 .card-inner,
-        .span-lime .card-inner {
+        .span-lime .card-inner,
+        .span-klipper .card-inner {
             padding: 14px;
         }
 
@@ -479,6 +480,7 @@
         .span-2048      { grid-column: 9 / span 4;  grid-row: 1 / span 3; }
         .span-hero      { grid-column: 1 / span 8;  grid-row: 2 / span 4; }
         .span-lime      { grid-column: 9 / span 4;  grid-row: 4 / span 3; }
+        .span-klipper   { grid-column: 9 / span 4;  grid-row: 7 / span 2; }
         .span-berkeley  { grid-column: 1 / span 4;  grid-row: 6 / span 2; }
         .span-calsol    { grid-column: 5 / span 4;  grid-row: 6 / span 2; }
 
@@ -496,13 +498,15 @@
             .span-2048,
             .span-berkeley,
             .span-calsol,
-            .span-lime {
+            .span-lime,
+            .span-klipper {
                 grid-row: auto;
             }
             .span-dock     { grid-column: 1 / -1; }
             .span-hero     { grid-column: 1 / -1; }
             .span-2048     { grid-column: 1 / span 4; }
             .span-lime     { grid-column: 5 / span 4; }
+            .span-klipper  { grid-column: 5 / span 4; }
             .span-berkeley { grid-column: 1 / span 4; }
             .span-calsol   { grid-column: 5 / span 4; }
         }
@@ -519,7 +523,8 @@
             .span-2048,
             .span-berkeley,
             .span-calsol,
-            .span-lime {
+            .span-lime,
+            .span-klipper {
                 grid-column: 1 / -1;
                 grid-row: auto;
             }
@@ -574,6 +579,7 @@
         .span-lime     { animation-delay: 240ms; }
         .span-berkeley { animation-delay: 300ms; }
         .span-calsol   { animation-delay: 360ms; }
+        .span-klipper  { animation-delay: 420ms; }
 
         .cursor-glow {
             position: fixed;
@@ -714,6 +720,19 @@
                     <p class="eyebrow">Hardware</p>
                     <h3 class="project-title">Lime Extruder</h3>
                     <p class="project-desc">Custom 3D printer extruder I designed &amp; built during my internship at Phaetus.</p>
+                    <span class="project-arrow">
+                        View on GitHub
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg>
+                    </span>
+                </div>
+            </a>
+
+            <!-- KLIPPER FOR MAC CARD -->
+            <a class="bento-card interactive span-klipper" href="https://github.com/ProtonKicker/Klipper-for-Mac?spm=a2ty_o07.30620332.0.0.31033da96FMGi5" target="_blank" rel="noopener" aria-label="Klipper for Mac project">
+                <div class="card-inner project-card">
+                    <p class="eyebrow">Software</p>
+                    <h3 class="project-title">Klipper for Mac</h3>
+                    <p class="project-desc">MacOS devices as 3D printer host.</p>
                     <span class="project-arrow">
                         View on GitHub
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg>
