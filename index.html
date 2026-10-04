@@ -348,8 +348,16 @@
         }
 
         .span-2048 .card-inner,
-        .span-lime .card-inner {
+        .span-lime .card-inner,
+        .span-github .card-inner {
             padding: 14px;
+        }
+
+        /* ============ GitHub link cards (no image preview) ============ */
+
+        .github-card {
+            justify-content: center;
+            gap: 3px;
         }
 
         .project-arrow svg {
@@ -479,6 +487,7 @@
         .span-2048      { grid-column: 9 / span 4;  grid-row: 1 / span 3; }
         .span-hero      { grid-column: 1 / span 8;  grid-row: 2 / span 4; }
         .span-lime      { grid-column: 9 / span 4;  grid-row: 4 / span 3; }
+        .span-github    { grid-column: 9 / span 4;  grid-row: 7 / span 2; }
         .span-berkeley  { grid-column: 1 / span 4;  grid-row: 6 / span 2; }
         .span-calsol    { grid-column: 5 / span 4;  grid-row: 6 / span 2; }
 
@@ -496,13 +505,15 @@
             .span-2048,
             .span-berkeley,
             .span-calsol,
-            .span-lime {
+            .span-lime,
+            .span-github {
                 grid-row: auto;
             }
             .span-dock     { grid-column: 1 / -1; }
             .span-hero     { grid-column: 1 / -1; }
             .span-2048     { grid-column: 1 / span 4; }
             .span-lime     { grid-column: 5 / span 4; }
+            .span-github   { grid-column: 1 / -1; }
             .span-berkeley { grid-column: 1 / span 4; }
             .span-calsol   { grid-column: 5 / span 4; }
         }
@@ -519,7 +530,8 @@
             .span-2048,
             .span-berkeley,
             .span-calsol,
-            .span-lime {
+            .span-lime,
+            .span-github {
                 grid-column: 1 / -1;
                 grid-row: auto;
             }
@@ -572,6 +584,7 @@
         .span-hero     { animation-delay: 120ms; }
         .span-2048     { animation-delay: 180ms; }
         .span-lime     { animation-delay: 240ms; }
+        .span-github   { animation-delay: 270ms; }
         .span-berkeley { animation-delay: 300ms; }
         .span-calsol   { animation-delay: 360ms; }
 
@@ -714,6 +727,18 @@
                     <p class="eyebrow">Hardware</p>
                     <h3 class="project-title">Lime Extruder</h3>
                     <p class="project-desc">Custom 3D printer extruder I designed &amp; built during my internship at Phaetus.</p>
+                    <span class="project-arrow">
+                        View on GitHub
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg>
+                    </span>
+                </div>
+            </a>
+
+            <!-- GITHUB PROFILE CARD (link only — title + intro + view on github) -->
+            <a class="bento-card interactive span-github" href="https://github.com/ProtonKicker" target="_blank" rel="noopener" aria-label="GitHub profile">
+                <div class="card-inner project-card github-card">
+                    <h3 class="project-title">GitHub</h3>
+                    <p class="project-desc">All my projects &mdash; interested in 3D printing and basically all tech stuff.</p>
                     <span class="project-arrow">
                         View on GitHub
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg>
