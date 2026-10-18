@@ -346,12 +346,12 @@
             text-decoration: none;
         }
 
-        .span-2048 .card-inner,
-        .span-lime .card-inner {
+        .span-audiocat .card-inner {
             padding: 14px;
         }
 
-        .span-klipper .card-inner {
+        .span-klipper .card-inner,
+        .span-kocoa .card-inner {
             padding: 16px 14px;
         }
 
@@ -479,38 +479,40 @@
         }
 
         .span-dock      { grid-column: 1 / span 8;  grid-row: 1 / span 1; }
-        .span-2048      { grid-column: 9 / span 4;  grid-row: 1 / span 3; }
-        .span-hero      { grid-column: 1 / span 8;  grid-row: 2 / span 4; }
-        .span-lime      { grid-column: 9 / span 4;  grid-row: 4 / span 3; }
-        .span-klipper   { grid-column: 9 / span 4;  grid-row: 7 / span 1; }
-        .span-berkeley  { grid-column: 1 / span 4;  grid-row: 6 / span 1; }
-        .span-calsol    { grid-column: 5 / span 4;  grid-row: 6 / span 1; }
+        .span-audiocat  { grid-column: 9 / span 4;  grid-row: 1 / span 3; }
+        .span-hero      { grid-column: 1 / span 8;  grid-row: 2 / span 5; }
+        .span-kocoa     { grid-column: 9 / span 4;  grid-row: 4 / span 1; }
+        .span-klipper   { grid-column: 9 / span 4;  grid-row: 5 / span 1; }
+        .span-berkeley  { grid-column: 1 / span 4;  grid-row: 7 / span 1; }
+        .span-calsol    { grid-column: 5 / span 4;  grid-row: 7 / span 1; }
 
         @media (max-width: 1024px) {
             .bento-grid {
                 grid-template-columns: repeat(8, 1fr);
                 grid-template-rows: none;
-                grid-auto-rows: minmax(80px, auto);
+                grid-auto-rows: minmax(min-content, auto);
                 height: auto;
                 padding: 20px;
                 gap: 16px;
             }
             .span-dock,
             .span-hero,
-            .span-2048,
+            .span-audiocat,
+            .span-kocoa,
+            .span-klipper,
             .span-berkeley,
-            .span-calsol,
-            .span-lime,
-            .span-klipper {
+            .span-calsol {
                 grid-row: auto;
             }
+            .span-audiocat,
+            .span-kocoa { align-self: stretch; }
             .span-dock     { grid-column: 1 / -1; }
             .span-hero     { grid-column: 1 / -1; }
-            .span-2048     { grid-column: 1 / span 4; }
-            .span-lime     { grid-column: 5 / span 4; }
-            .span-klipper  { grid-column: 5 / span 4; }
-            .span-berkeley { grid-column: 1 / span 4; }
-            .span-calsol   { grid-column: 5 / span 4; }
+            .span-audiocat { grid-column: 1 / span 4; grid-row: 3; }
+            .span-kocoa    { grid-column: 5 / span 4; grid-row: 3 / span 2; align-self: stretch; }
+            .span-berkeley { grid-column: 1 / span 4; grid-row: 4; }
+            .span-calsol   { grid-column: 5 / span 4; grid-row: 5; }
+            .span-klipper  { grid-column: 1 / span 4; grid-row: 5; }
         }
 
         @media (max-width: 720px) {
@@ -522,11 +524,11 @@
             }
             .span-hero,
             .span-dock,
-            .span-2048,
+            .span-audiocat,
+            .span-kocoa,
+            .span-klipper,
             .span-berkeley,
-            .span-calsol,
-            .span-lime,
-            .span-klipper {
+            .span-calsol {
                 grid-column: 1 / -1;
                 grid-row: auto;
             }
@@ -576,12 +578,12 @@
             animation: card-in 700ms var(--ease-spring) both;
         }
         .span-dock     { animation-delay: 60ms; }
-        .span-hero     { animation-delay: 120ms; }
-        .span-2048     { animation-delay: 180ms; }
-        .span-lime     { animation-delay: 240ms; }
-        .span-berkeley { animation-delay: 300ms; }
-        .span-calsol   { animation-delay: 360ms; }
-        .span-klipper  { animation-delay: 420ms; }
+        .span-audiocat { animation-delay: 120ms; }
+        .span-hero     { animation-delay: 180ms; }
+        .span-kocoa    { animation-delay: 240ms; }
+        .span-klipper  { animation-delay: 300ms; }
+        .span-berkeley { animation-delay: 360ms; }
+        .span-calsol   { animation-delay: 420ms; }
 
         .cursor-glow {
             position: fixed;
@@ -693,16 +695,26 @@
                 </div>
             </a>
 
-           
-
-            <!-- LIME EXTRUDER CARD (same size/layout as 2048) -->
-            <a class="bento-card interactive span-lime" href="https://github.com/ProtonKicker/Lime" target="_blank" rel="noopener" aria-label="Lime Extruder project">
+            <!-- AUDIO CAT CARD -->
+            <a class="bento-card interactive span-audiocat" href="https://github.com/ProtonKicker/Audio-Cat" target="_blank" rel="noopener" aria-label="Audio Cat Android audio player">
                 <div class="card-inner project-card">
                     <div class="project-media" aria-hidden="true">
-                        <img src="assets/lime-extruder.jpg" alt="Lime extruder mounted on a 3D printer" loading="lazy">
+                        <img src="assets/audiocat-banner.jpg" alt="Audio Cat app banner — offline Android audio player" loading="lazy">
                     </div>
-                    <h3 class="project-title">Lime Extruder</h3>
-                    <p class="project-desc">Custom 3D printer extruder I designed &amp; built during my internship at Phaetus.</p>
+                    <h3 class="project-title">Audio Cat</h3>
+                    <p class="project-desc">Offline Android audio player. Plays audio tracks from local video files — no video decoder, no network, no tracking.</p>
+                    <span class="project-arrow">
+                        View on GitHub
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"></path></svg>
+                    </span>
+                </div>
+            </a>
+
+            <!-- KOKOIA BEAM CARD -->
+            <a class="bento-card interactive span-kocoa" href="https://github.com/ProtonKicker/Kocoa-Beam" target="_blank" rel="noopener" aria-label="Kocoa Beam — Klipper for Android">
+                <div class="card-inner project-card" style="position: relative;">
+                    <h3 class="project-title">Kocoa Beam</h3>
+                    <p class="project-desc">Run Klipper or Kalico on any Android 5.0+ device with OTG — Kotlin rewrite, 10 concurrent instances, cloud-free.</p>
                     <span class="project-arrow">
                         View on GitHub
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"></path></svg>
@@ -711,10 +723,10 @@
             </a>
 
             <!-- KLIPPER FOR MAC CARD -->
-            <a class="bento-card interactive span-klipper" href="https://github.com/ProtonKicker/Klipper-for-Mac?spm=a2ty_o07.30620332.0.0.31033da96FMGi5" target="_blank" rel="noopener" aria-label="Klipper for Mac project">
+            <a class="bento-card interactive span-klipper" href="https://github.com/ProtonKicker/Klipper-for-Mac" target="_blank" rel="noopener" aria-label="Klipper for Mac project">
                 <div class="card-inner project-card" style="position: relative;">
                     <h3 class="project-title">Klipper for Mac</h3>
-                    <p class="project-desc">MacOS devices as 3D printer host.</p>
+                    <p class="project-desc">Run Klipper natively on macOS — Intel or Apple Silicon. Pristine upstream, no Linux VM, native SwiftUI GUI.</p>
                     <span class="project-arrow">
                         View on GitHub
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"></path></svg>
