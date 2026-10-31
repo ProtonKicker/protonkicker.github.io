@@ -485,6 +485,7 @@
         .span-klipper   { grid-column: 9 / span 4;  grid-row: 5 / span 1; }
         .span-berkeley  { grid-column: 1 / span 4;  grid-row: 7 / span 1; min-height: 100px; }
         .span-calsol    { grid-column: 5 / span 4;  grid-row: 7 / span 1; }
+        .side-pair      { display: contents; }
 
         @media (max-width: 1024px) {
             .bento-grid {
@@ -506,11 +507,10 @@
             }
             .span-dock     { grid-column: 1 / -1; }
             .span-hero     { grid-column: 1 / -1; }
-            .span-audiocat { grid-column: 1 / span 4; grid-row: span 2; }
-            .span-kocoa    { grid-column: 5 / span 4; align-self: start; }
+            .span-audiocat { grid-column: 1 / span 4; grid-row: span 2; align-self: start; }
+            .side-pair     { display: flex; flex-direction: column; gap: 16px; grid-column: 5 / span 4; align-self: start; }
             .span-kocoa .card-inner { max-height: 140px; overflow: hidden; }
             .span-berkeley { grid-column: 1 / span 4; }
-            .span-klipper  { grid-column: 5 / span 4; }
             .span-calsol   { grid-column: 5 / span 4; }
         }
 
@@ -531,6 +531,7 @@
                 grid-column: 1 / -1;
                 grid-row: auto;
             }
+            .side-pair { display: contents; }
             .card-inner { padding: 22px; }
             .hero-name { font-size: 5rem; }
             .dock-grid { grid-template-columns: repeat(4, 1fr); }
@@ -708,29 +709,32 @@
                 </div>
             </a>
 
-            <!-- KOKOIA BEAM CARD -->
-            <a class="bento-card interactive span-kocoa" href="https://github.com/ProtonKicker/Kocoa-Beam" target="_blank" rel="noopener" aria-label="Kocoa Beam — Klipper for Android">
-                <div class="card-inner project-card" style="position: relative;">
-                    <h3 class="project-title">Kocoa Beam</h3>
-                    <p class="project-desc">Run Klipper or Kalico on any Android 5.0+ device with OTG — Kotlin rewrite, 10 concurrent instances, cloud-free.</p>
-                    <span class="project-arrow">
-                        View on GitHub
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"></path></svg>
-                    </span>
-                </div>
-            </a>
+            <!-- KOCOA + KLIPPER PAIR: invisible on desktop/mobile, stacks as one column on tablet -->
+            <div class="side-pair">
+                <!-- KOKOIA BEAM CARD -->
+                <a class="bento-card interactive span-kocoa" href="https://github.com/ProtonKicker/Kocoa-Beam" target="_blank" rel="noopener" aria-label="Kocoa Beam — Klipper for Android">
+                    <div class="card-inner project-card" style="position: relative;">
+                        <h3 class="project-title">Kocoa Beam</h3>
+                        <p class="project-desc">Run Klipper or Kalico on any Android 5.0+ device with OTG — Kotlin rewrite, 10 concurrent instances, cloud-free.</p>
+                        <span class="project-arrow">
+                            View on GitHub
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"></path></svg>
+                        </span>
+                    </div>
+                </a>
 
-            <!-- KLIPPER FOR MAC CARD -->
-            <a class="bento-card interactive span-klipper" href="https://github.com/ProtonKicker/Klipper-for-Mac" target="_blank" rel="noopener" aria-label="Klipper for Mac project">
-                <div class="card-inner project-card" style="position: relative;">
-                    <h3 class="project-title">Klipper for Mac</h3>
-                    <p class="project-desc">Run Klipper natively on macOS — Intel or Apple Silicon. Pristine upstream, no Linux VM, native SwiftUI GUI.</p>
-                    <span class="project-arrow">
-                        View on GitHub
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"></path></svg>
-                    </span>
-                </div>
-            </a>
+                <!-- KLIPPER FOR MAC CARD -->
+                <a class="bento-card interactive span-klipper" href="https://github.com/ProtonKicker/Klipper-for-Mac" target="_blank" rel="noopener" aria-label="Klipper for Mac project">
+                    <div class="card-inner project-card" style="position: relative;">
+                        <h3 class="project-title">Klipper for Mac</h3>
+                        <p class="project-desc">Run Klipper natively on macOS — Intel or Apple Silicon. Pristine upstream, no Linux VM, native SwiftUI GUI.</p>
+                        <span class="project-arrow">
+                            View on GitHub
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"></path></svg>
+                        </span>
+                    </div>
+                </a>
+            </div>
 
         </main>
     </div>
