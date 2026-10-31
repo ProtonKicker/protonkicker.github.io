@@ -433,7 +433,7 @@
         .info-sub {
             font-size: 0.78rem;
             color: var(--text-secondary);
-            line-height: 1.35;
+            line-height: 1.4;
             margin: 0;
         }
 
@@ -483,7 +483,7 @@
         .span-hero      { grid-column: 1 / span 8;  grid-row: 2 / span 5; }
         .span-kocoa     { grid-column: 9 / span 4;  grid-row: 4 / span 1; }
         .span-klipper   { grid-column: 9 / span 4;  grid-row: 5 / span 1; }
-        .span-berkeley  { grid-column: 1 / span 4;  grid-row: 7 / span 1; }
+        .span-berkeley  { grid-column: 1 / span 4;  grid-row: 7 / span 1; min-height: 100px; }
         .span-calsol    { grid-column: 5 / span 4;  grid-row: 7 / span 1; }
 
         @media (max-width: 1024px) {
@@ -506,11 +506,11 @@
             }
             .span-dock     { grid-column: 1 / -1; }
             .span-hero     { grid-column: 1 / -1; }
-            .span-audiocat { grid-column: 1 / span 4; }
+            .span-audiocat { grid-column: 1 / span 4; grid-row: span 2; }
             .span-kocoa    { grid-column: 5 / span 4; align-self: start; }
             .span-kocoa .card-inner { max-height: 140px; overflow: hidden; }
             .span-berkeley { grid-column: 1 / span 4; }
-            .span-klipper  { grid-column: 1 / span 4; }
+            .span-klipper  { grid-column: 5 / span 4; }
             .span-calsol   { grid-column: 5 / span 4; }
         }
 
@@ -670,9 +670,8 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
                         </div>
                         <div class="info-content">
-                            <p class="info-label">Student</p>
                             <h4 class="info-title">UC Berkeley</h4>
-                            <p class="info-sub">Applied Mathematics &nbsp;·&nbsp; Fluid Mechanics</p>
+                            <p class="info-sub">Applied Mathematics &nbsp;·&nbsp; Fluid Mechanics<br>Mechanical Engineering</p>
                         </div>
                     </div>
                 </div>
